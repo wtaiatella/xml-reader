@@ -1,5 +1,10 @@
+* {
+	margin: 0;
+	padding: 0;
+}
 .App {
 	padding: 0;
+	font-size: calc(1px + 2vmin);
 }
 
 .App-logo {
@@ -7,18 +12,68 @@
 	pointer-events: none;
 }
 
-.App-header {
-	padding: 50px;
+.App-body {
+	padding: 3rem;
 	background-color: #18fcf4;
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
 
-	font-size: calc(10px + 2vmin);
 	color: black;
 }
 
+h1 {
+	font-size: 1.5em;
+	margin-top: 1rem;
+	margin-bottom: 2rem;
+}
+
+.FileInput {
+	font-size: 1em;
+}
+
+.FileName {
+	font-size: 1.2em;
+	margin: 1.5em 0;
+}
+
+.FileName strong {
+	font-size: 1em;
+}
+
+.Container {
+	display: flex;
+	padding: 0 2em;
+}
+
+.Info {
+	flex: 1;
+}
+
+.Titulo {
+	font-size: 1.5em;
+	margin-bottom: 20px;
+}
+
+.Dados {
+	margin-bottom: 10px;
+	display: block;
+}
+
+.Linha {
+	display: block;
+	border-top: 2px solid black;
+	padding-bottom: 10px;
+}
+.Form {
+	flex: 1.5;
+	padding-left: 100px;
+}
+
 .ButtonSubmit {
-	width: 150px;
+	display: block;
+	width: 200px;
+	height: 50px;
+	font-size: 1.5em;
 	margin-top: 20px;
 }

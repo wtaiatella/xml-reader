@@ -1,96 +1,190 @@
-import React from 'react';
-// eslint-disable-next-line no-unused-vars
-import XMLParser from 'react-xml-parser';
-//import List from '../xml.xml';
+import React, { useEffect, useState } from 'react';
+//import XMLParser from 'react-xml-parser';
 
 import './App.css';
 
 const App = () => {
-	const handleSubmit = (ev) => {
-		ev.preventDefault();
-		//console.log(ev);
-		console.log(ev.target[0].files[0]);
+	const [xmlData, setXmlData] = useState({
+		fileName: '',
+		xml: null,
+		Name: '',
+		ZoomFactor: '0',
+		Width: '0',
+		PixelRatio: '0',
+		MaxY: '0',
+		MaxX: '0',
+		Height: '0',
+	});
+	const [showForm, setShowForm] = useState(false);
+	const [sizes, setSizes] = useState('');
 
-		const file = ev.target[0].files[0];
-		const reader = new FileReader();
+	const handleSetXmlFile = async (event) => {
+		console.log('Dentro do subscribe');
+		console.log(event.target.files[0]);
 
-		reader.readAsText(file);
-		reader.onloadend = (evt) => {
-			const readerData = evt.target.result;
+		if (event.target.files[0]) {
+			const reader = new FileReader();
+			reader.readAsText(event.target.files[0]);
+			reader.onloadend = async (evt) => {
+				const readerData = evt.target.result;
 
-			console.log('Dados de entrada');
-			console.log(readerData);
+				const parser = new DOMParser();
+				const xml = parser.parseFromString(readerData, 'text/xml');
 
-			const parser = new DOMParser();
-			const xml = parser.parseFromString(readerData, 'text/xml');
-			console.log(xml);
+				//console.log(xmlWorldmap);
+				console.log('XML resultant do parser');
+				console.log(xml);
+				console.log(xml.getElementsByTagName('Worldmap')[0]);
+				const xmlWorldmap = xml.getElementsByTagName('Worldmap')[0];
 
-			//const pi1 = xml.createAttribute('version="1.0" encoding="UTF-8"');
-			//const pi2 = xml.createAttributeNS('version="1.0" encoding="UTF-8"');
-			//const pi2 = xml.createComment('version="1.0" encoding="UTF-8"');
-			//const pi2 = xml.('version="1.0" encoding="UTF-8"');
+				console.log(xmlWorldmap.getAttribute('Name'));
+				setXmlData({
+					fileName: event.target.files[0].name,
+					xml: xml,
+					Name: xmlWorldmap.getAttribute('Name'),
+					ZoomFactor: xmlWorldmap.getAttribute('ZoomFactor'),
+					Width: xmlWorldmap.getAttribute('Width'),
+					PixelRatio: xmlWorldmap.getAttribute('PixelRatio'),
+					MaxY: xmlWorldmap.getAttribute('MaxY'),
+					MaxX: xmlWorldmap.getAttribute('MaxX'),
+					Height: xmlWorldmap.getAttribute('Height'),
+				});
+			};
+		}
+	};
 
-			//xml.appendChild(pi1);
+	useEffect(() => {
+		if (xmlData.xml) {
+			console.log('subscribe');
+			console.log(xmlData.xml);
+			console.log(`Name = ${xmlData.Name}`);
+			console.log(`ZoomFactor = ${xmlData.ZoomFactor}`);
+			console.log(`Width = ${xmlData.Width}`);
+			console.log(`PixelRatio = ${xmlData.PixelRatio}`);
+			console.log(`MaxY = ${xmlData.MaxY}`);
+			console.log(`MaxX = ${xmlData.MaxX}`);
+			console.log(`Height = ${xmlData.Height}`);
 
-			const xmlWorldmap = xml.getElementsByTagName('Worldmap')[0];
-			xmlWorldmap.setAttribute('Name', 'Novo nome123');
+			setShowForm(true);
+		}
+	}, [xmlData]);
 
-			console.log(xmlWorldmap);
-			console.log('XML resultant do parser');
-			console.log(xml);
+	const handleSubmit = async (event) => {
+		event.preventDefault();
 
-			console.log(
-				'XML do parser convertido para String, somente para console.log '
-			);
-			console.log(
-				'<?xml version="1.0" encoding="UTF-8"?>\n' +
-					new XMLSerializer().serializeToString(xml.documentElement)
-			);
+		console.log('função handlerSumit');
+		console.log(sizes);
 
-			var NewXml = new XMLParser().parseFromString(
-				new XMLSerializer().serializeToString(xml.documentElement)
-			); // Assume xmlText contains the example XML
+		const resXY = sizes.split('x');
+		const largura = resXY[0];
+		const altura = resXY[1];
 
-			console.log(
-				'newxml',
-				NewXml.children[0].children[0].children[0].attributes
-			);
-			//NewXml.children[0].children[0].children[0].attributes.Name =
-			//('teste de xml');
+		const xmlText = new XMLSerializer().serializeToString(
+			xmlData.xml.documentElement
+		);
 
-			//criação do documento xml
-			//const doc = document.implementation.createDocument('', '', null);
+		/*
+		console.log(
+			'XML do parser convertido para String, somente para console.log '
+		);
+		console.log(xmlText);
+		*/
 
-			//Download do XML modificado
-			var element = document.createElement('a');
-			element.setAttribute(
-				'href',
-				'data:text/plain;charset=utf-8, ' +
-					encodeURIComponent(
-						new XMLSerializer().serializeToString(
-							xml.documentElement
-						)
-					)
-			);
-			element.setAttribute('download', file.name);
-			document.body.appendChild(element);
-			element.click();
-			//document.body.removeChild(element);
-		};
+		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap')[0];
+		xmlWorldmap.setAttribute('Width', largura);
+		xmlWorldmap.setAttribute('MaxX', largura);
+
+		xmlWorldmap.setAttribute('Height', altura);
+		xmlWorldmap.setAttribute('MaxY', altura);
+		console.log(xmlWorldmap);
+
+		//Download do XML modificado
+		var element = document.createElement('a');
+		element.setAttribute(
+			'href',
+			'data:text/plain;charset=utf-8,' +
+				`<?xml version="1.0" encoding="UTF-8"?>\n` +
+				encodeURIComponent(xmlText)
+		);
+		element.setAttribute('download', xmlData.fileName);
+		console.log('element para download');
+		console.log(element);
+		document.body.appendChild(element);
+		element.click();
 	};
 
 	return (
 		<div className='App'>
-			<header className='App-header'>
+			<div className='App-body'>
 				<img src='./logoSiemens.png' className='App-logo' alt='logo' />
-				<p>Escolha arquivo XML</p>
-				<form onSubmit={handleSubmit}>
-					<input type='file' />
-					<button type='submit' className='ButtonSubmit'>
-						Carregar
-					</button>
-				</form>
-			</header>
+				<h1>Escolha arquivo XML</h1>
+				<input
+					type='file'
+					className='FileInput'
+					onChange={handleSetXmlFile}
+				/>
+				{showForm ? (
+					<>
+						<p className='FileName'>
+							<strong>Nome do arquivo : </strong>
+							{xmlData.Name}
+						</p>
+						<div className='Container'>
+							<section className='Info'>
+								<p className='Titulo'>Atributos do WorldMap</p>
+								<div className='Linha'></div>
+								<p className='Dados'>
+									<strong>ZoomFactor : </strong>
+									{xmlData.ZoomFactor}
+								</p>
+								<p className='Dados'>
+									<strong>PixelRatio : </strong>
+									{xmlData.PixelRatio}
+								</p>
+								<div className='Linha'></div>
+								<p className='Dados'>
+									<strong>Width : </strong>
+									{xmlData.Width} px
+								</p>
+								<p className='Dados'>
+									<strong>Height : </strong>
+									{xmlData.Height} px
+								</p>
+								<div className='Linha'></div>
+								<p className='Dados'>
+									<strong>MaxY : </strong>
+									{xmlData.MaxY} px
+								</p>
+								<p className='Dados'>
+									<strong>MaxX : </strong>
+									{xmlData.MaxX} px
+								</p>
+								<div className='Linha'></div>
+							</section>
+							<form className='Form' onSubmit={handleSubmit}>
+								<p className='Titulo'>Alteração de Atributos</p>
+								<input
+									type='text'
+									list='Sizes'
+									placeholder='Escolha uma Resolução'
+									onChange={(event) =>
+										setSizes(event.target.value)
+									}
+								/>
+								<datalist id='Sizes'>
+									<option>1500x900</option>
+									<option>3200x1200</option>
+								</datalist>
+								<button type='submit' className='ButtonSubmit'>
+									Carregar
+								</button>
+							</form>
+						</div>
+					</>
+				) : (
+					<span> </span>
+				)}
+			</div>
 		</div>
 	);
 };
