@@ -7,6 +7,9 @@ export const UserStorage = ({ children }) => {
 	const [xmlData, setXmlData] = useState({
 		fileName: '',
 		xml: null,
+		worldmaps: null,
+		posAtual: 0,
+		quantidade: 0,
 		Name: '',
 		ZoomFactor: '0',
 		Width: '0',
