@@ -10,20 +10,26 @@ const ConfigXmlData = (file, setXmlData) => {
 		//console.log(xmlWorldmap);
 		console.log('XML resultant do parser');
 		console.log(xml);
-		console.log(xml.getElementsByTagName('Worldmap')[0]);
-		const xmlWorldmap = xml.getElementsByTagName('Worldmap')[0];
+		console.log(xml.getElementsByTagName('Worldmap'));
+		const xmlWorldmaps = xml.getElementsByTagName('Worldmap');
+		//const qntWorldmaps = xmlWorldmaps.length();
+		//console.log(`Quantidade de Worldmaps = ${qntWorldmaps}`);
 
-		console.log(xmlWorldmap.getAttribute('Name'));
+		console.log(xmlWorldmaps.length);
+		console.log(xmlWorldmaps[0].getAttribute('Name'));
 		setXmlData({
 			fileName: file.name,
 			xml: xml,
-			Name: xmlWorldmap.getAttribute('Name'),
-			ZoomFactor: xmlWorldmap.getAttribute('ZoomFactor'),
-			Width: xmlWorldmap.getAttribute('Width'),
-			PixelRatio: xmlWorldmap.getAttribute('PixelRatio'),
-			MaxY: xmlWorldmap.getAttribute('MaxY'),
-			MaxX: xmlWorldmap.getAttribute('MaxX'),
-			Height: xmlWorldmap.getAttribute('Height'),
+			worldmaps: xmlWorldmaps,
+			posAtual: 0,
+			quantidade: xmlWorldmaps.length,
+			Name: xmlWorldmaps[0].getAttribute('Name'),
+			ZoomFactor: xmlWorldmaps[0].getAttribute('ZoomFactor'),
+			Width: xmlWorldmaps[0].getAttribute('Width'),
+			PixelRatio: xmlWorldmaps[0].getAttribute('PixelRatio'),
+			MaxY: xmlWorldmaps[0].getAttribute('MaxY'),
+			MaxX: xmlWorldmaps[0].getAttribute('MaxX'),
+			Height: xmlWorldmaps[0].getAttribute('Height'),
 		});
 	};
 };
