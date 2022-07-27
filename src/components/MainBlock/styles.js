@@ -1,8 +1,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	flex: 1;
-	max-width: 400px;
+	flex-basis: 400px;
 
 	.Dados {
 		margin-bottom: 10px;

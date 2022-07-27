@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { UserContext } from '../../contexts/UserContext';
+import { UserContext } from '../../../../contexts/UserContext';
 import { Container } from './styles';
 import { RedoOutlined, PlusOutlined } from '@ant-design/icons';
 import { Divider, Input, message, Select, Space, Typography } from 'antd';
@@ -90,7 +90,7 @@ export function Form() {
 			<Select
 				style={{ width: 300 }}
 				allowClear
-				placeholder='custom dropdown render'
+				placeholder='Selecione as dimensões'
 				onSelect={onSelectSizeChange}
 				dropdownRender={(menu) => (
 					<>

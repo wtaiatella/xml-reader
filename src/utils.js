@@ -15,6 +15,43 @@ const ConfigXmlData = (file, setXmlData) => {
 		//const qntWorldmaps = xmlWorldmaps.length();
 		//console.log(`Quantidade de Worldmaps = ${qntWorldmaps}`);
 
+		let listGoViews = [];
+
+		for (let worldmap of xmlWorldmaps) {
+			const xmlGoViews = worldmap.getElementsByTagName('GoView');
+			listGoViews = [
+				...listGoViews,
+				{
+					Name: worldmap.getAttribute('Name'),
+					goview: [],
+				},
+			];
+			for (let goview of xmlGoViews) {
+				listGoViews = listGoViews.map((item) => {
+					if (item.Name === worldmap.getAttribute('Name')) {
+						return {
+							Name: worldmap.getAttribute('Name'),
+							goview: [
+								...item.goview,
+								{
+									Name: goview.getAttribute('Name'),
+									Width: goview.getAttribute('Width'),
+									Height: goview.getAttribute('Height'),
+									Top: goview.getAttribute('Top'),
+									Left: goview.getAttribute('Left'),
+									Visible: goview.getAttribute('Visible'),
+								},
+							],
+						};
+					} else {
+						return item;
+					}
+				});
+			}
+		}
+		console.log('lista de GoViews');
+		console.log(listGoViews);
+
 		console.log(xmlWorldmaps.length);
 		console.log(xmlWorldmaps[0].getAttribute('Name'));
 		setXmlData({

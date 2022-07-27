@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useContext } from 'react';
-import { Form } from '../Form';
-import { Info } from '../Info';
-import { UserContext } from '../../contexts/UserContext';
+import { Form } from './Form';
+import { Info } from './Info';
+import { UserContext } from '../../../contexts/UserContext';
 import {
 	ArrowRightOutlined,
 	ArrowLeftOutlined,
@@ -12,7 +12,7 @@ import { Button } from 'antd';
 
 import { Container } from './styles';
 
-export function Content() {
+export function UpdateXml() {
 	const { xmlData, setXmlData } = useContext(UserContext);
 	const [showForm, setShowForm] = useState(false);
 
@@ -123,10 +123,16 @@ export function Content() {
 			{showForm ? (
 				<>
 					<div className='Worldmap'>
-						<p>
-							<strong>Posição do Worldmap: </strong>
-							{xmlData.posAtual + 1} / {xmlData.quantidade}
-						</p>
+						<>
+							<span className='LabelField'>
+								Posição do Worldmap:{' '}
+							</span>
+
+							<span className='TextField'>
+								{xmlData.posAtual + 1} / {xmlData.quantidade}
+							</span>
+						</>
+
 						<Button
 							type='primary'
 							icon={<ArrowLeftOutlined />}
@@ -139,13 +145,16 @@ export function Content() {
 							icon={<ArrowRightOutlined />}
 							onClick={handleNext}
 						>
-							Proximo
+							Próximo
 						</Button>
 					</div>
-					<p className='FileName'>
-						<strong>Nome do Worldmap: </strong>
-						{xmlData.Name}
-					</p>
+
+					<div className='Worldmap'>
+						<span className='LabelField'>Nome do Worldmap: </span>
+
+						<span className='TextField'>{xmlData.Name}</span>
+					</div>
+
 					<div className='Container'>
 						<Info />
 						<Form />

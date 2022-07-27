@@ -18,6 +18,7 @@ export const UserStorage = ({ children }) => {
 		MaxX: '0',
 		Height: '0',
 	});
+	const [resumo, setResumo] = useState(false);
 
 	return (
 		<UserContext.Provider
@@ -26,6 +27,8 @@ export const UserStorage = ({ children }) => {
 				setSizes,
 				xmlData,
 				setXmlData,
+				resumo,
+				setResumo,
 			}}
 		>
 			{children}

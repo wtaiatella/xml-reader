@@ -2,27 +2,3 @@
 	margin: 0;
 	padding: 0;
 }
-.App {
-	padding: 0;
-	font-size: calc(1px + 2vmin);
-}
-
-.App-logo {
-	width: 250px;
-	pointer-events: none;
-}
-
-.App-body {
-	padding: 3rem;
-	background-color: #18fcf4;
-	min-height: 100vh;
-	display: flex;
-	flex-direction: column;
-
-	color: black;
-}
-
-.Titulo {
-	font-size: 1.5em;
-	margin-bottom: 20px;
-}
