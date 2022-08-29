@@ -3,9 +3,10 @@ import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 
 import utils from './../../utils';
+import { Link } from 'react-router-dom';
 
 export function Header() {
-	const { xmlData, setXmlData, resumo, setResumo } = useContext(UserContext);
+	const { xmlData, setXmlData } = useContext(UserContext);
 
 	const handleUpload = async (event) => {
 		console.log('Dentro do subscribe');
@@ -14,14 +15,6 @@ export function Header() {
 		if (event.target.files[0]) {
 			utils.ConfigXmlData(event.target.files[0], setXmlData);
 		}
-	};
-
-	const handleAtualizar = () => {
-		if (resumo === true) setResumo(false);
-	};
-
-	const handleResumo = () => {
-		if (resumo === false) setResumo(true);
 	};
 
 	return (
@@ -41,8 +34,9 @@ export function Header() {
 			</div>
 
 			<div className='Menu'>
-				<button onClick={handleAtualizar}>Atualizar XML</button>
-				<button onClick={handleResumo}>Ver Resumo</button>
+				<Link to='/'>Atualizar XML</Link>
+				<Link to='/tabela'>Ver Tabela</Link>
+				<Link to='/mapa'>Ver Mapa</Link>
 			</div>
 		</Container>
 	);

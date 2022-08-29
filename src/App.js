@@ -1,9 +1,12 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserStorage } from './contexts/UserContext';
 import styled from 'styled-components';
 import './App.css';
 import { Header } from './components/Header';
-import { MainBlock } from './components/MainBlock';
+import { UpdateXml } from './components/UpdateXml';
+import { XmlTable } from './components/XmlTable';
+import { XmlMap } from './components/XmlMap';
 
 const Container = styled.div`
 	padding: 0;
@@ -16,20 +19,26 @@ const Content = styled.div`
 	display: flex;
 	flex-direction: column;
 	color: black;
-	max-width: 1300px;
+	max-width: 1200px;
 	margin: 0 auto;
 `;
 
 const App = () => {
 	return (
-		<UserStorage>
-			<Container>
-				<Content>
-					<Header />
-					<MainBlock />
-				</Content>
-			</Container>
-		</UserStorage>
+		<BrowserRouter>
+			<UserStorage>
+				<Container>
+					<Content>
+						<Header />
+						<Routes>
+							<Route path='/' element={<UpdateXml />} />
+							<Route path='/tabela' element={<XmlTable />} />
+							<Route path='/mapa' element={<XmlMap />} />
+						</Routes>
+					</Content>
+				</Container>
+			</UserStorage>
+		</BrowserRouter>
 	);
 };
 

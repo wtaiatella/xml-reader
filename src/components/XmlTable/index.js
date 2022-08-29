@@ -4,10 +4,10 @@ import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Table } from 'antd';
 
-import { UserContext } from '../../../contexts/UserContext';
+import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 
-export function ReportXml() {
+export function XmlTable() {
 	const [searchText, setSearchText] = useState('');
 	const [searchedColumn, setSearchedColumn] = useState('');
 	const searchInput = useRef(null);

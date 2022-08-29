@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useContext } from 'react';
 import { Form } from './Form';
 import { Info } from './Info';
-import { UserContext } from '../../../contexts/UserContext';
+import { UserContext } from '../../contexts/UserContext';
 import {
 	ArrowRightOutlined,
 	ArrowLeftOutlined,

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { UserContext } from '../../../../contexts/UserContext';
+import { UserContext } from '../../../contexts/UserContext';
 import { Container } from './styles';
 import { RedoOutlined, PlusOutlined } from '@ant-design/icons';
 import { Divider, Input, message, Select, Space, Typography } from 'antd';
