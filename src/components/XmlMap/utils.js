@@ -1,4 +1,4 @@
-function printXML(xmlRef) {
+function printXML(xmlRef, xmlLevel = 1) {
 	console.log(xmlRef.length);
 	console.log(xmlRef);
 	let arrXml = [];
@@ -13,35 +13,34 @@ function printXML(xmlRef) {
 				return item.title === xmlItem.tagName;
 			});
 		}
-		console.log(buscaItem);
 
-		// if (buscaItem.length === 0) {
-		// 	console.log(`ainda não existe no Array`);
-		// 	if (xmlItem.childElementCount > 0) {
-		// 		console.log('Com Children, Nova referencia do xml');
-		// 		console.log(xmlItem.children);
-		// 		const children = printXML(xmlItem.children);
-		// 		console.log(children);
+		if (buscaItem.length === 0) {
+			console.log(`ainda não existe no Array`);
+			if (xmlItem.childElementCount > 0) {
+				console.log('Com Children, Nova referencia do xml');
+				console.log(xmlItem.children);
+				const children = printXML(xmlItem.children);
+				console.log(children);
 
-		// 		arrXml = [
-		// 			...arrXml,
-		// 			{
-		// 				title: xmlItem.tagName,
-		// 				key: xmlItem.tagName,
-		// 				//children: printXML(xmlItem.children),
-		// 			},
-		// 		];
-		// 	} else {
-		// 		console.log('Sem Children, vai para próximo xmlItem');
-		// 		arrXml = [
-		// 			...arrXml,
-		// 			{
-		// 				title: xmlItem.tagName,
-		// 				key: xmlItem.tagName,
-		// 			},
-		// 		];
-		// 	}
-		// }
+				arrXml = [
+					...arrXml,
+					{
+						title: xmlItem.tagName,
+						key: xmlItem.tagName,
+						children: children,
+					},
+				];
+			} else {
+				console.log('Sem Children, vai para próximo xmlItem');
+				arrXml = [
+					...arrXml,
+					{
+						title: xmlItem.tagName,
+						key: xmlItem.tagName,
+					},
+				];
+			}
+		}
 	}
 
 	return arrXml;
