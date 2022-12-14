@@ -4,11 +4,14 @@ import Highlighter from 'react-highlight-words';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Table } from 'antd';
 
+import { EditWorlmap } from './EditWorldmap';
+
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 
 export function XmlTable() {
 	const [searchText, setSearchText] = useState('');
+	const [showEdit, setShowEdit] = useState(false);
 	const [searchedColumn, setSearchedColumn] = useState('');
 	const searchInput = useRef(null);
 
@@ -33,6 +36,12 @@ export function XmlTable() {
 			},
 		];
 	}
+
+	const handleEdit = (key) => {
+		const editData = data.filter((item) => item.key === key);
+		console.log(editData);
+		setShowEdit(true);
+	};
 
 	console.log(data);
 
@@ -139,6 +148,7 @@ export function XmlTable() {
 			dataIndex: 'Name',
 			key: 'Name',
 			width: '15%',
+			fixed: 'left',
 			...getColumnSearchProps('Name'),
 		},
 
@@ -185,11 +195,27 @@ export function XmlTable() {
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { MaxY }) => <>{MaxY} px</>,
 		},
+		{
+			title: 'Action',
+			key: 'operation',
+			fixed: 'right',
+			width: 100,
+			render: (_, record) => {
+				return (
+					<Button
+						title='Download de arquivo'
+						type='primary'
+						onClick={() => handleEdit(record.key)}
+					>
+						Edit
+					</Button>
+				);
+			},
+		},
 	];
 
 	return (
 		<Container>
-			<p>Relatório XML</p>
 			<Table
 				className='tableData'
 				columns={columns}
@@ -197,7 +223,15 @@ export function XmlTable() {
 				pagination={{
 					pageSize: 100,
 				}}
+				scroll={{ x: 1000 }}
 			/>
+			{showEdit ? (
+				<EditWorlmap
+					className='editData'
+					setShowEdit={setShowEdit}
+					editData={editData}
+				/>
+			) : null}
 		</Container>
 	);
 }
