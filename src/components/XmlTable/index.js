@@ -1,21 +1,122 @@
 import { useContext, useRef, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Input, Space, Table } from 'antd';
-
-import { EditWorlmap } from './EditWorldmap';
+import {
+	SearchOutlined,
+	PlusOutlined,
+	DownloadOutlined,
+} from '@ant-design/icons';
+import {
+	Button,
+	Input,
+	Space,
+	Table,
+	Modal,
+	Select,
+	Divider,
+	Typography,
+	message,
+} from 'antd';
 
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 
 export function XmlTable() {
 	const [searchText, setSearchText] = useState('');
-	const [showEdit, setShowEdit] = useState(false);
 	const [searchedColumn, setSearchedColumn] = useState('');
 	const searchInput = useRef(null);
+	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+	const [open, setOpen] = useState(false);
+	const [confirmLoading, setConfirmLoading] = useState(false);
+	const [size, setSize] = useState('');
+	const [newSize, setNewSize] = useState('');
+	const [items, setItems] = useState(['1200x900', '3200x1800']);
 
+	const { Option } = Select;
 	const { xmlData } = useContext(UserContext);
+
+	const onNewSizeChange = (event) => {
+		setNewSize(event.target.value);
+	};
+
+	const onSelectSizeChange = (valor) => {
+		console.log('Select change');
+		console.log(valor);
+		setSize(valor);
+	};
+
+	const addItem = (e) => {
+		e.preventDefault();
+		const re = new RegExp(`^[0-9]+[x][0-9]+$`);
+		console.log(newSize);
+		if (re.test(newSize)) {
+			setItems([...items, newSize]);
+			setNewSize('');
+		} else {
+			message.error(
+				'Valor inválido. Entre com um valor do tipo 0000x0000'
+			);
+		}
+	};
+
+	const showModal = () => {
+		setOpen(true);
+	};
+
+	const handleModalOk = () => {
+		setConfirmLoading(true);
+
+		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap');
+		console.log('Modal OK');
+		console.log(size);
+		console.log(xmlWorldmap);
+		console.log(selectedRowKeys);
+
+		const resXY = size.split('x');
+		const largura = resXY[0];
+		const altura = resXY[1];
+
+		for (let selectedWorldmap of selectedRowKeys) {
+			for (let worldmap of xmlWorldmap) {
+				console.log('selectedWorldmap: ', selectedWorldmap);
+				console.log(
+					'worldmap.getAttribute(Name): ',
+					worldmap.getAttribute('Name')
+				);
+
+				if (selectedWorldmap === worldmap.getAttribute('Name')) {
+					worldmap.setAttribute('Width', largura);
+					worldmap.setAttribute('MaxX', largura);
+					worldmap.setAttribute('Height', altura);
+					worldmap.setAttribute('MaxY', altura);
+
+					console.log(`Worlmap atualizado`);
+					console.log(worldmap);
+					console.log(xmlData.xml.getElementsByTagName('Worldmap'));
+				}
+			}
+		}
+
+		setTimeout(() => {
+			setOpen(false);
+			setConfirmLoading(false);
+		}, 500);
+	};
+	const handleModalCancel = () => {
+		console.log('Clicked cancel button');
+		setOpen(false);
+	};
+
+	const onSelectChange = (newSelectedRowKeys) => {
+		console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+		setSelectedRowKeys(newSelectedRowKeys);
+	};
+
+	const rowSelection = {
+		selectedRowKeys,
+		onChange: onSelectChange,
+	};
+	const hasSelected = selectedRowKeys.length > 0;
 
 	console.log(xmlData.worldmaps);
 
@@ -37,10 +138,10 @@ export function XmlTable() {
 		];
 	}
 
-	const handleEdit = (key) => {
-		const editData = data.filter((item) => item.key === key);
-		console.log(editData);
-		setShowEdit(true);
+	const handleEdit = (keys) => {
+		//const editData = data.filter((item) => item.key === key);
+		console.log(keys);
+		showModal();
 	};
 
 	console.log(data);
@@ -205,7 +306,7 @@ export function XmlTable() {
 					<Button
 						title='Download de arquivo'
 						type='primary'
-						onClick={() => handleEdit(record.key)}
+						onClick={() => handleEdit([record.key])}
 					>
 						Edit
 					</Button>
@@ -214,24 +315,105 @@ export function XmlTable() {
 		},
 	];
 
+	const handleSave = () => {
+		const xmlText = new XMLSerializer().serializeToString(
+			xmlData.xml.documentElement
+		);
+
+		//Download do XML modificado
+		var element = document.createElement('a');
+		element.setAttribute(
+			'href',
+			'data:text/plain;charset=utf-8,' +
+				`<?xml version="1.0" encoding="UTF-8"?>\n` +
+				encodeURIComponent(xmlText)
+		);
+		element.setAttribute('download', xmlData.fileName);
+		console.log('element para download');
+		console.log(element);
+		document.body.appendChild(element);
+		element.click();
+	};
+
 	return (
 		<Container>
-			<Table
-				className='tableData'
-				columns={columns}
-				dataSource={data}
-				pagination={{
-					pageSize: 100,
-				}}
-				scroll={{ x: 1000 }}
-			/>
-			{showEdit ? (
-				<EditWorlmap
-					className='editData'
-					setShowEdit={setShowEdit}
-					editData={editData}
+			<div>
+				<Button
+					type='primary'
+					onClick={() => handleEdit(selectedRowKeys)}
+					disabled={!hasSelected}
+				>
+					Reload
+				</Button>
+				<span
+					style={{
+						marginLeft: 8,
+					}}
+				>
+					{hasSelected
+						? `Selected ${selectedRowKeys.length} items`
+						: ''}
+				</span>
+			</div>
+			<Button
+				type='primary'
+				icon={<DownloadOutlined />}
+				onClick={handleSave}
+				className='ButtonSave'
+			>
+				Salvar
+			</Button>
+			<div>
+				<Table
+					className='tableData'
+					rowSelection={rowSelection}
+					columns={columns}
+					dataSource={data}
+					pagination={false}
+					scroll={{ x: 1000 }}
 				/>
-			) : null}
+			</div>
+			<Modal
+				title='Title'
+				open={open}
+				onOk={handleModalOk}
+				onCancel={handleModalCancel}
+				confirmLoading={confirmLoading}
+			>
+				<p>Texto adicional do Modal</p>
+				<Select
+					style={{ width: 300 }}
+					allowClear
+					placeholder='Selecione as dimensões'
+					onSelect={onSelectSizeChange}
+					dropdownRender={(menu) => (
+						<>
+							{menu}
+							<Divider style={{ margin: '8px 0' }} />
+							<Space
+								align='center'
+								style={{ padding: '0 8px 4px' }}
+							>
+								<Input
+									placeholder='Please enter item'
+									value={newSize}
+									onChange={onNewSizeChange}
+								/>
+								<Typography.Link
+									onClick={addItem}
+									style={{ whiteSpace: 'nowrap' }}
+								>
+									<PlusOutlined /> Add item
+								</Typography.Link>
+							</Space>
+						</>
+					)}
+				>
+					{items.map((item) => (
+						<Option key={item}>{item}</Option>
+					))}
+				</Select>
+			</Modal>
 		</Container>
 	);
 }
