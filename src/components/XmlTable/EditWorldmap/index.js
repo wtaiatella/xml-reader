@@ -3,11 +3,9 @@ import { UserContext } from '../../../contexts/UserContext';
 import { Container } from './styles';
 import { RedoOutlined, PlusOutlined } from '@ant-design/icons';
 import { Divider, Input, message, Select, Space, Typography } from 'antd';
-//import 'antd/dist/antd.css';
-
 const { Option } = Select;
 
-export function Form() {
+export function EditWorlmap() {
 	const { xmlData, setXmlData } = useContext(UserContext);
 	const [size, setSize] = useState('');
 	const [newSize, setNewSize] = useState('');

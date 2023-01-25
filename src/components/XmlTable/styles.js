@@ -1,7 +1,11 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	flex-basis: 400px;
+	display: flex;
+
+	.tableData {
+		flex-grow: 1;
+	}
 
 	.ant-table-thead > tr > th,
 	.ant-table-tbody > tr > td,
