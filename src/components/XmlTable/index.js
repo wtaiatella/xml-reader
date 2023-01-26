@@ -1,111 +1,21 @@
 import { useContext, useRef, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 
-import {
-	SearchOutlined,
-	PlusOutlined,
-	DownloadOutlined,
-} from '@ant-design/icons';
-import {
-	Button,
-	Input,
-	Space,
-	Table,
-	Modal,
-	Select,
-	Divider,
-	Typography,
-	message,
-} from 'antd';
+import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Button, Input, Space, Table } from 'antd';
 
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
+import { TableModal } from './Modal';
 
 export function XmlTable() {
 	const [searchText, setSearchText] = useState('');
 	const [searchedColumn, setSearchedColumn] = useState('');
 	const searchInput = useRef(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-	const [open, setOpen] = useState(false);
-	const [confirmLoading, setConfirmLoading] = useState(false);
-	const [size, setSize] = useState('');
-	const [newSize, setNewSize] = useState('');
-	const [items, setItems] = useState(['1200x900', '3200x1800']);
+	const [openModal, setOpenModal] = useState(false);
 
-	const { Option } = Select;
 	const { xmlData } = useContext(UserContext);
-
-	const onNewSizeChange = (event) => {
-		setNewSize(event.target.value);
-	};
-
-	const onSelectSizeChange = (valor) => {
-		console.log('Select change');
-		console.log(valor);
-		setSize(valor);
-	};
-
-	const addItem = (e) => {
-		e.preventDefault();
-		const re = new RegExp(`^[0-9]+[x][0-9]+$`);
-		console.log(newSize);
-		if (re.test(newSize)) {
-			setItems([...items, newSize]);
-			setNewSize('');
-		} else {
-			message.error(
-				'Valor inválido. Entre com um valor do tipo 0000x0000'
-			);
-		}
-	};
-
-	const showModal = () => {
-		setOpen(true);
-	};
-
-	const handleModalOk = () => {
-		setConfirmLoading(true);
-
-		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap');
-		console.log('Modal OK');
-		console.log(size);
-		console.log(xmlWorldmap);
-		console.log(selectedRowKeys);
-
-		const resXY = size.split('x');
-		const largura = resXY[0];
-		const altura = resXY[1];
-
-		for (let selectedWorldmap of selectedRowKeys) {
-			for (let worldmap of xmlWorldmap) {
-				console.log('selectedWorldmap: ', selectedWorldmap);
-				console.log(
-					'worldmap.getAttribute(Name): ',
-					worldmap.getAttribute('Name')
-				);
-
-				if (selectedWorldmap === worldmap.getAttribute('Name')) {
-					worldmap.setAttribute('Width', largura);
-					worldmap.setAttribute('MaxX', largura);
-					worldmap.setAttribute('Height', altura);
-					worldmap.setAttribute('MaxY', altura);
-
-					console.log(`Worlmap atualizado`);
-					console.log(worldmap);
-					console.log(xmlData.xml.getElementsByTagName('Worldmap'));
-				}
-			}
-		}
-
-		setTimeout(() => {
-			setOpen(false);
-			setConfirmLoading(false);
-		}, 500);
-	};
-	const handleModalCancel = () => {
-		console.log('Clicked cancel button');
-		setOpen(false);
-	};
 
 	const onSelectChange = (newSelectedRowKeys) => {
 		console.log('selectedRowKeys changed: ', newSelectedRowKeys);
@@ -139,12 +49,9 @@ export function XmlTable() {
 	}
 
 	const handleEdit = (keys) => {
-		//const editData = data.filter((item) => item.key === key);
 		console.log(keys);
-		showModal();
+		setOpenModal(true);
 	};
-
-	console.log(data);
 
 	const handleSearch = (selectedKeys, confirm, dataIndex) => {
 		confirm();
@@ -248,7 +155,7 @@ export function XmlTable() {
 			title: 'Nome da tela',
 			dataIndex: 'Name',
 			key: 'Name',
-			width: '15%',
+			width: '25%',
 			fixed: 'left',
 			...getColumnSearchProps('Name'),
 		},
@@ -257,14 +164,14 @@ export function XmlTable() {
 			title: 'ZoomFactor',
 			dataIndex: 'ZoomFactor',
 			key: 'ZoomFactor',
-			width: '15%',
+			width: '12%',
 		},
 
 		{
 			title: 'Width',
 			dataIndex: 'Width',
 			key: 'Width',
-			width: '15%',
+			width: '12%',
 			sorter: (a, b) => a.Width - b.Width,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { Width }) => <>{Width} px</>,
@@ -273,7 +180,7 @@ export function XmlTable() {
 			title: 'Height',
 			dataIndex: 'Height',
 			key: 'Height',
-			width: '15%',
+			width: '12%',
 			sorter: (a, b) => a.Height - b.Height,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { Height }) => <>{Height} px</>,
@@ -282,7 +189,7 @@ export function XmlTable() {
 			title: 'MaxX',
 			dataIndex: 'MaxX',
 			key: 'MaxX',
-			width: '15%',
+			width: '12%',
 			sorter: (a, b) => a.MaxX - b.MaxX,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { MaxX }) => <>{MaxX} px</>,
@@ -291,7 +198,7 @@ export function XmlTable() {
 			title: 'MaxY',
 			dataIndex: 'MaxY',
 			key: 'MaxY',
-			width: '15%',
+			width: '12%',
 			sorter: (a, b) => a.MaxY - b.MaxY,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { MaxY }) => <>{MaxY} px</>,
@@ -337,83 +244,48 @@ export function XmlTable() {
 
 	return (
 		<Container>
-			<div>
+			<div className='headerTable'>
+				<div className='buttonEdit'>
+					<Button
+						type='primary'
+						onClick={() => handleEdit(selectedRowKeys)}
+						disabled={!hasSelected}
+					>
+						Reload
+					</Button>
+					<span
+						style={{
+							marginLeft: 8,
+						}}
+					>
+						{hasSelected
+							? `Selected ${selectedRowKeys.length} items`
+							: ''}
+					</span>
+				</div>
 				<Button
 					type='primary'
-					onClick={() => handleEdit(selectedRowKeys)}
-					disabled={!hasSelected}
+					icon={<DownloadOutlined />}
+					onClick={handleSave}
+					className='buttonSave'
 				>
-					Reload
+					Salvar
 				</Button>
-				<span
-					style={{
-						marginLeft: 8,
-					}}
-				>
-					{hasSelected
-						? `Selected ${selectedRowKeys.length} items`
-						: ''}
-				</span>
 			</div>
-			<Button
-				type='primary'
-				icon={<DownloadOutlined />}
-				onClick={handleSave}
-				className='ButtonSave'
-			>
-				Salvar
-			</Button>
-			<div>
-				<Table
-					className='tableData'
-					rowSelection={rowSelection}
-					columns={columns}
-					dataSource={data}
-					pagination={false}
-					scroll={{ x: 1000 }}
-				/>
-			</div>
-			<Modal
-				title='Title'
-				open={open}
-				onOk={handleModalOk}
-				onCancel={handleModalCancel}
-				confirmLoading={confirmLoading}
-			>
-				<p>Texto adicional do Modal</p>
-				<Select
-					style={{ width: 300 }}
-					allowClear
-					placeholder='Selecione as dimensões'
-					onSelect={onSelectSizeChange}
-					dropdownRender={(menu) => (
-						<>
-							{menu}
-							<Divider style={{ margin: '8px 0' }} />
-							<Space
-								align='center'
-								style={{ padding: '0 8px 4px' }}
-							>
-								<Input
-									placeholder='Please enter item'
-									value={newSize}
-									onChange={onNewSizeChange}
-								/>
-								<Typography.Link
-									onClick={addItem}
-									style={{ whiteSpace: 'nowrap' }}
-								>
-									<PlusOutlined /> Add item
-								</Typography.Link>
-							</Space>
-						</>
-					)}
-				>
-					{items.map((item) => (
-						<Option key={item}>{item}</Option>
-					))}
-				</Select>
-			</Modal>
+			<Table
+				className='tableData'
+				rowSelection={rowSelection}
+				columns={columns}
+				dataSource={data}
+				pagination={false}
+				scroll={{ x: 1000 }}
+			/>
+
+			<TableModal
+				open={openModal}
+				setOpen={() => setOpenModal()}
+				selectedRowKeys={selectedRowKeys}
+			/>
 		</Container>
 	);
 }
