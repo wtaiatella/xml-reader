@@ -4,7 +4,7 @@ import { UserStorage } from './contexts/UserContext';
 import styled from 'styled-components';
 import './App.css';
 import { Header } from './components/Header';
-import { UpdateXml } from './components/UpdateXml';
+//import { UpdateXml } from './components/UpdateXml';
 import { XmlTable } from './components/XmlTable';
 import { XmlMap } from './components/XmlMap';
 
@@ -31,7 +31,7 @@ const App = () => {
 					<Content>
 						<Header />
 						<Routes>
-							<Route path='/' element={<UpdateXml />} />
+							<Route path='/' element={<XmlTable />} />
 							<Route path='/tabela' element={<XmlTable />} />
 							<Route path='/mapa' element={<XmlMap />} />
 						</Routes>

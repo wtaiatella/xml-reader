@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useRef, useState, useEffect } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
@@ -14,8 +14,17 @@ export function XmlTable() {
 	const searchInput = useRef(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	const [openModal, setOpenModal] = useState(false);
+	const [showTable, setShowTable] = useState(false);
 
 	const { xmlData } = useContext(UserContext);
+
+	useEffect(() => {
+		if (xmlData.xml) {
+			setShowTable(true);
+		} else {
+			setShowTable(false);
+		}
+	}, [xmlData]);
 
 	const onSelectChange = (newSelectedRowKeys) => {
 		console.log('selectedRowKeys changed: ', newSelectedRowKeys);
@@ -32,20 +41,22 @@ export function XmlTable() {
 
 	let data = [];
 
-	for (let item of xmlData.worldmaps) {
-		data = [
-			...data,
-			{
-				key: item.getAttribute('Name'),
-				Name: item.getAttribute('Name'),
-				ZoomFactor: item.getAttribute('ZoomFactor'),
-				Width: item.getAttribute('Width'),
-				PixelRatio: item.getAttribute('PixelRatio'),
-				MaxY: item.getAttribute('MaxY'),
-				MaxX: item.getAttribute('MaxX'),
-				Height: item.getAttribute('Height'),
-			},
-		];
+	if (xmlData.xml) {
+		for (let item of xmlData.worldmaps) {
+			data = [
+				...data,
+				{
+					key: item.getAttribute('Name'),
+					Name: item.getAttribute('Name'),
+					ZoomFactor: item.getAttribute('ZoomFactor'),
+					Width: item.getAttribute('Width'),
+					PixelRatio: item.getAttribute('PixelRatio'),
+					MaxY: item.getAttribute('MaxY'),
+					MaxX: item.getAttribute('MaxX'),
+					Height: item.getAttribute('Height'),
+				},
+			];
+		}
 	}
 
 	const handleEdit = (keys) => {
@@ -132,7 +143,7 @@ export function XmlTable() {
 				.includes(value.toLowerCase());
 		},
 
-		onFilterDropdownVisibleChange: (visible) => {
+		onFilterDropdownOpenChange: (visible) => {
 			if (visible) {
 				setTimeout(() => searchInput.current?.select(), 100);
 			}
@@ -244,48 +255,58 @@ export function XmlTable() {
 
 	return (
 		<Container>
-			<div className='headerTable'>
-				<div className='buttonEdit'>
-					<Button
-						type='primary'
-						onClick={() => handleEdit(selectedRowKeys)}
-						disabled={!hasSelected}
-					>
-						Reload
-					</Button>
-					<span
-						style={{
-							marginLeft: 8,
-						}}
-					>
-						{hasSelected
-							? `Selected ${selectedRowKeys.length} items`
-							: ''}
-					</span>
-				</div>
-				<Button
-					type='primary'
-					icon={<DownloadOutlined />}
-					onClick={handleSave}
-					className='buttonSave'
-				>
-					Salvar
-				</Button>
-			</div>
-			<Table
-				className='tableData'
-				rowSelection={rowSelection}
-				columns={columns}
-				dataSource={data}
-				pagination={false}
-				scroll={{ x: 1000 }}
-			/>
+			{showTable ? (
+				<>
+					<div className='headerTable'>
+						<p>Arquivo: {xmlData.fileName}</p>
+						<p>Grupo de Worldmaps: {xmlData.xmlWmGroup}</p>
+					</div>
+					<div className='buttonsTable'>
+						<div className='buttonEdit'>
+							<Button
+								type='primary'
+								onClick={() => handleEdit(selectedRowKeys)}
+								disabled={!hasSelected}
+							>
+								Reload
+							</Button>
+							<span
+								style={{
+									marginLeft: 8,
+								}}
+							>
+								{hasSelected
+									? `Selected ${selectedRowKeys.length} items`
+									: ''}
+							</span>
+						</div>
+						<Button
+							type='primary'
+							icon={<DownloadOutlined />}
+							onClick={handleSave}
+							className='buttonSave'
+						>
+							Salvar
+						</Button>
+					</div>
+					<Table
+						className='tableData'
+						rowSelection={rowSelection}
+						columns={columns}
+						dataSource={data}
+						pagination={false}
+						scroll={{ x: 1000 }}
+					/>
 
-			<TableModal
-				open={openModal}
-				setOpen={() => setOpenModal()}
-				selectedRowKeys={selectedRowKeys}
-			/>
+					<TableModal
+						open={openModal}
+						setOpen={() => setOpenModal()}
+						selectedRowKeys={selectedRowKeys}
+					/>
+				</>
+			) : (
+				<span> </span>
+			)}
 		</Container>
 	);
 }

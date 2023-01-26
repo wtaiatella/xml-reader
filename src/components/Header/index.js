@@ -1,20 +1,31 @@
 import { useContext } from 'react';
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
+import { Button, message, Upload } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 
 import utils from './../../utils';
-import { Link } from 'react-router-dom';
 
 export function Header() {
-	const { xmlData, setXmlData } = useContext(UserContext);
+	const { setXmlData } = useContext(UserContext);
 
-	const handleUpload = async (event) => {
-		console.log('Dentro do subscribe');
-		console.log(event.target.files[0]);
+	const props = {
+		name: 'file',
+		multiple: false,
+		maxCount: 1,
+		showUploadList: false,
 
-		if (event.target.files[0]) {
-			utils.ConfigXmlData(event.target.files[0], setXmlData);
-		}
+		onChange(info) {
+			if (info.file.status !== 'uploading') {
+				console.log(info.file.originFileObj, info.fileList);
+			}
+			if (info.file.status === 'done') {
+				message.success(`${info.file.name} file uploaded successfully`);
+			} else if (info.file.status === 'error') {
+				message.success(`${info.file.name} file uploaded successfully`);
+				utils.ConfigXmlData(info.file.originFileObj, setXmlData);
+			}
+		},
 	};
 
 	return (
@@ -24,20 +35,12 @@ export function Header() {
 			</a>
 
 			<div className='fileInput'>
-				<label className='FileButton' htmlFor='getFile'>
-					Escolha arquivo XML
-				</label>
-				<label className='FileName' htmlFor='getFile'>
-					{xmlData.fileName}
-				</label>
-				<input id='getFile' type='file' onChange={handleUpload} />
+				<p className='FileName'>EDITOR DE WORLDMAPS</p>
 			</div>
 
-			<div className='Menu'>
-				<Link to='/'>Atualizar XML</Link>
-				<Link to='/tabela'>Ver Tabela</Link>
-				<Link to='/mapa'>Ver Mapa</Link>
-			</div>
+			<Upload {...props}>
+				<Button icon={<UploadOutlined />}>Click to Upload</Button>
+			</Upload>
 		</Container>
 	);
 }
