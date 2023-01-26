@@ -2,6 +2,14 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	display: flex;
+	flex-direction: column;
+
+	.headerTable {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		padding: 20px;
+	}
 
 	.tableData {
 		flex-grow: 1;
@@ -29,7 +37,9 @@ export const Container = styled.div`
 
 	.ant-table-thead
 		> tr
-		> th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
+		> th:not(:last-child):not(.ant-table-selection-column):not(
+			.ant-table-row-expand-icon-cell
+		):not([colspan])::before {
 		background-color: rgba(0, 0, 0, 1) !important;
 	}
 `;
