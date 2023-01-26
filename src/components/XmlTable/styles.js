@@ -5,6 +5,14 @@ export const Container = styled.div`
 	flex-direction: column;
 
 	.headerTable {
+		padding: 15px 20px 0 20px;
+
+		p:first-child {
+			padding-bottom: 7px;
+		}
+	}
+
+	.buttonsTable {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;

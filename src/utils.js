@@ -12,7 +12,9 @@ const ConfigXmlData = (file, setXmlData) => {
 		console.log(xml);
 		console.log(xml.getElementsByTagName('Worldmap'));
 		const xmlWorldmaps = xml.getElementsByTagName('Worldmap');
-		//const qntWorldmaps = xmlWorldmaps.length();
+		const xmlWmGroup = xml
+			.getElementsByTagName('WmGroup')[0]
+			.getAttribute('Name');
 		//console.log(`Quantidade de Worldmaps = ${qntWorldmaps}`);
 
 		let listGoViews = [];
@@ -58,6 +60,7 @@ const ConfigXmlData = (file, setXmlData) => {
 			fileName: file.name,
 			xml: xml,
 			worldmaps: xmlWorldmaps,
+			xmlWmGroup,
 			posAtual: 0,
 			quantidade: xmlWorldmaps.length,
 			Name: xmlWorldmaps[0].getAttribute('Name'),
