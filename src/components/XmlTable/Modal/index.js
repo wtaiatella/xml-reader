@@ -75,6 +75,15 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 					worldmap.setAttribute('Height', sizeY);
 					worldmap.setAttribute('MaxY', sizeY);
 
+					const xmlGoView = worldmap.getElementsByTagName('GoView');
+
+					for (let goView of xmlGoView) {
+						goView.setAttribute('Width', sizeX);
+						goView.setAttribute('Height', sizeY);
+						goView.setAttribute('top', 0);
+						goView.setAttribute('left', 0);
+					}
+
 					console.log(`Worlmap atualizado`);
 					console.log(worldmap);
 					console.log(xmlData.xml.getElementsByTagName('Worldmap'));
