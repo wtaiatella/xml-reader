@@ -1,4 +1,4 @@
-const ConfigXmlData = (file, setXmlData) => {
+const ConfigXmlData = (file, setXmlData, xmlData) => {
 	const reader = new FileReader();
 	reader.readAsText(file);
 	reader.onloadend = async (evt) => {
@@ -15,7 +15,6 @@ const ConfigXmlData = (file, setXmlData) => {
 		const xmlWmGroup = xml
 			.getElementsByTagName('WmGroup')[0]
 			.getAttribute('Name');
-		//console.log(`Quantidade de Worldmaps = ${qntWorldmaps}`);
 
 		let listGoViews = [];
 
@@ -54,9 +53,11 @@ const ConfigXmlData = (file, setXmlData) => {
 		console.log('lista de GoViews');
 		console.log(listGoViews);
 
+		console.log('Quantidade de Worlmaps');
 		console.log(xmlWorldmaps.length);
-		console.log(xmlWorldmaps[0].getAttribute('Name'));
+
 		setXmlData({
+			...xmlData,
 			fileName: file.name,
 			xml: xml,
 			worldmaps: xmlWorldmaps,

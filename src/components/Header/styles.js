@@ -7,11 +7,6 @@ export const Container = styled.header`
 	padding: 1.5em;
 	border-bottom: 2px solid black;
 
-	.App-logo {
-		width: 10em;
-		pointer-events: none;
-	}
-
 	.fileInput {
 		padding: 0.5em 1em;
 

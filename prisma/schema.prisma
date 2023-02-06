@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model XmlConfig {
+  id          String  @default(cuid())  @id
+  oldSizeX       Float  
+  oldSizeY       Float   
+  newSizeX       Float?   
+  newSizeY       Float?
+  limitLeft      Float?
+  limitRight     Float?
+  hasRightMenu   Boolean @default(false)
+  
+}
+
+

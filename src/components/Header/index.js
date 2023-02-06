@@ -5,9 +5,11 @@ import { Button, message, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 
 import utils from './../../utils';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export function Header() {
-	const { setXmlData } = useContext(UserContext);
+	const { xmlData, setXmlData } = useContext(UserContext);
 
 	const props = {
 		name: 'file',
@@ -20,26 +22,43 @@ export function Header() {
 				console.log(info.file.originFileObj, info.fileList);
 			}
 			if (info.file.status === 'done') {
-				message.success(`${info.file.name} file uploaded successfully`);
+				message.success(
+					`${info.file.name} file uploaded successfully really`
+				);
+				utils.ConfigXmlData(
+					info.file.originFileObj,
+					setXmlData,
+					xmlData
+				);
 			} else if (info.file.status === 'error') {
 				message.success(`${info.file.name} file uploaded successfully`);
-				utils.ConfigXmlData(info.file.originFileObj, setXmlData);
+				utils.ConfigXmlData(
+					info.file.originFileObj,
+					setXmlData,
+					xmlData
+				);
 			}
 		},
 	};
 
 	return (
 		<Container>
-			<a href='/'>
-				<img src='./logoSiemens.png' className='App-logo' alt='logo' />
-			</a>
+			<Link href='/'>
+				<Image
+					src='/images/logoSiemens.png'
+					className='App-logo'
+					alt='logo'
+					width='107'
+					height='87'
+				/>
+			</Link>
 
 			<div className='fileInput'>
 				<p className='FileName'>EDITOR DE WORLDMAPS</p>
 			</div>
 
 			<Upload {...props}>
-				<Button icon={<UploadOutlined />}>Click to Upload</Button>
+				<Button icon={<UploadOutlined />}>Click para Upload</Button>
 			</Upload>
 		</Container>
 	);

@@ -37,7 +37,9 @@ export function XmlTable() {
 	};
 	const hasSelected = selectedRowKeys.length > 0;
 
+	console.log('Carregando dados');
 	console.log(xmlData.worldmaps);
+	console.log(xmlData.xmlConfig);
 
 	let data = [];
 

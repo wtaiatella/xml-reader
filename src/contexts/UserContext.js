@@ -17,6 +17,7 @@ export const UserStorage = ({ children }) => {
 		MaxY: '0',
 		MaxX: '0',
 		Height: '0',
+		xmlConfig: [],
 	});
 
 	return (

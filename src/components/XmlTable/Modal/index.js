@@ -1,52 +1,123 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../../contexts/UserContext';
 import { Container } from './styles';
 import { PlusOutlined } from '@ant-design/icons';
 import {
 	Modal,
-	Divider,
+	Table,
+	Button,
 	Input,
-	message,
-	Select,
-	Space,
+	Form,
+	InputNumber,
 	Typography,
+	Popconfirm,
+	EditableContext,
 } from 'antd';
 //import 'antd/dist/antd.css';
+
+const EditableRow = ({ index, ...props }) => {
+	const [form] = Form.useForm();
+	return (
+		<Form form={form} component={false}>
+			<EditableContext.Provider value={form}>
+				<tr {...props} />
+			</EditableContext.Provider>
+		</Form>
+	);
+};
+
+const EditableCell = ({
+	editing,
+	dataIndex,
+	title,
+	inputType,
+	record,
+	index,
+	children,
+	...restProps
+}) => {
+	const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+	return (
+		<td {...restProps}>
+			{editing ? (
+				<Form.Item
+					name={dataIndex}
+					style={{
+						margin: 0,
+					}}
+					rules={[
+						{
+							required: true,
+							message: `Please Input ${title}!`,
+						},
+					]}
+				>
+					{inputNode}
+				</Form.Item>
+			) : (
+				children
+			)}
+		</td>
+	);
+};
 
 export function TableModal({ open, setOpen, selectedRowKeys }) {
 	const { xmlData } = useContext(UserContext);
 	const [newSize, setNewSize] = useState('');
 	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [sizeSelected, setSizeSelected] = useState('');
+	const [sizeList, setSizeList] = useState([]);
 
-	const onNewSizeChange = (event) => {
-		setNewSize(event.target.value);
+	const [form] = Form.useForm();
+
+	const [editingKey, setEditingKey] = useState('');
+
+	const isEditing = (record) => record.key === editingKey;
+
+	const edit = (record) => {
+		form.setFieldsValue({
+			name: '',
+			age: '',
+			address: '',
+			...record,
+		});
+		setEditingKey(record.key);
 	};
 
-	const { Option } = Select;
-	const [sizeList, setSizeList] = useState(['1200x900', '3200x1800']);
-
-	console.log('open = ', open);
-
-	const onSelectSizeChange = (valor) => {
-		console.log('Select change');
-		console.log(valor);
-		setSizeSelected(valor);
+	const cancel = () => {
+		setEditingKey('');
 	};
 
-	const addNewSize = (e) => {
-		e.preventDefault();
-		const sizeRegExp = new RegExp(`^[0-9]+[x][0-9]+$`);
-		console.log(newSize);
-		if (sizeRegExp.test(newSize)) {
-			setSizeList([...sizeList, newSize]);
-			setNewSize('');
-		} else {
-			message.error(
-				'Valor inválido. Entre com um valor do tipo 0000x0000'
-			);
+	const save = async (key) => {
+		try {
+			const row = await form.validateFields();
+			const newData = [...sizeList];
+			const index = newData.findIndex((item) => key === item.key);
+			if (index > -1) {
+				const item = newData[index];
+				newData.splice(index, 1, {
+					...item,
+					...row,
+				});
+				setSizeList(newData);
+				setEditingKey('');
+			} else {
+				newData.push(row);
+				setSizeList(newData);
+				setEditingKey('');
+			}
+		} catch (errInfo) {
+			console.log('Validate Failed:', errInfo);
 		}
 	};
+
+	useEffect(() => {
+		if (xmlData.xmlConfig) {
+			setSizeList(xmlData.xmlConfig);
+		}
+	}, [xmlData]);
+
+	console.log('open = ', open);
 
 	const handleModalOk = () => {
 		setConfirmLoading(true);
@@ -102,50 +173,153 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		setOpen(false);
 	};
 
+	const columns = [
+		{
+			title: 'Largura',
+			dataIndex: 'oldSizeX',
+			key: 'oldSizeX',
+			width: '12%',
+			editable: true,
+			sorter: (a, b) => a.oldSizeX - b.oldSizeX,
+			sortDirections: ['descend', 'ascend'],
+			render: (_, { oldSizeX }) => <>{oldSizeX} px</>,
+		},
+		{
+			title: 'Altura',
+			dataIndex: 'oldSizeY',
+			width: '12%',
+			editable: true,
+			sorter: (a, b) => a.oldSizeY - b.oldSizeY,
+			sortDirections: ['descend', 'ascend'],
+			render: (_, { oldSizeY }) => <>{oldSizeY} px</>,
+		},
+		{
+			title: 'Nova Larg',
+			dataIndex: 'newSizeX',
+			key: 'newSizeX',
+			width: '13%',
+			editable: true,
+			sorter: (a, b) => a.newSizeX - b.newSizeX,
+			sortDirections: ['descend', 'ascend'],
+			render: (_, { newSizeX }) => <>{newSizeX} px</>,
+		},
+		{
+			title: 'Nova Alt',
+			dataIndex: 'newSizeY',
+			key: 'newSizeY',
+			width: '13%',
+			editable: true,
+			sorter: (a, b) => a.newSizeY - b.newSizeY,
+			sortDirections: ['descend', 'ascend'],
+			render: (_, { newSizeY }) => <>{newSizeY} px</>,
+		},
+		{
+			title: 'Margem Esq',
+			dataIndex: 'limitLeft',
+			key: 'limitLeft',
+			width: '13%',
+			editable: true,
+			render: (_, { limitLeft }) => <>{limitLeft} px</>,
+		},
+		{
+			title: 'Margem Dir',
+			dataIndex: 'limitRight',
+			key: 'limitRight',
+			width: '13%',
+			editable: true,
+			render: (_, { limitRight }) => <>{limitRight} px</>,
+		},
+		{
+			title: 'Action',
+			key: 'operation',
+			fixed: 'right',
+			width: 100,
+			render: (_, record) => {
+				const editable = isEditing(record);
+				return editable ? (
+					<span>
+						<Typography.Link
+							onClick={() => save(record.key)}
+							style={{
+								marginRight: 8,
+							}}
+						>
+							Save
+						</Typography.Link>
+						<Popconfirm title='Sure to cancel?' onConfirm={cancel}>
+							<a>Cancel</a>
+						</Popconfirm>
+					</span>
+				) : (
+					<Typography.Link
+						disabled={editingKey !== ''}
+						onClick={() => edit(record)}
+					>
+						Edit
+					</Typography.Link>
+				);
+			},
+		},
+	];
+
+	// rowSelection object indicates the need for row selection
+	const rowSelection = {
+		onChange: (selectedRowKeys, selectedRows) => {
+			console.log(
+				`selectedRowKeys: ${selectedRowKeys}`,
+				'selectedRows: ',
+				selectedRows
+			);
+		},
+	};
+
+	const mergedColumns = columns.map((col) => {
+		if (!col.editable) {
+			return col;
+		}
+		return {
+			...col,
+			onCell: (record) => ({
+				record,
+				inputType: 'number',
+				dataIndex: col.dataIndex,
+				title: col.title,
+				editing: isEditing(record),
+			}),
+		};
+	});
+
 	return (
 		<Container>
 			<Modal
-				title='Seleção do tamanho da tela'
+				title='Seleção dos ajustes da tela'
 				open={open}
 				onOk={handleModalOk}
 				onCancel={handleModalCancel}
 				confirmLoading={confirmLoading}
+				width={1000}
+				centered
 			>
 				<p>
 					Selecione o novo tamanho de tela para os worldmaps marcados.
 				</p>
-				<Select
-					style={{ width: 300 }}
-					allowClear
-					placeholder='Selecione as dimensões'
-					onSelect={onSelectSizeChange}
-					dropdownRender={(menu) => (
-						<>
-							{menu}
-							<Divider style={{ margin: '8px 0' }} />
-							<Space
-								align='center'
-								style={{ padding: '0 8px 4px' }}
-							>
-								<Input
-									placeholder='Entre com novo tamanho'
-									value={newSize}
-									onChange={onNewSizeChange}
-								/>
-								<Typography.Link
-									onClick={addNewSize}
-									style={{ whiteSpace: 'nowrap' }}
-								>
-									<PlusOutlined /> Adicionar
-								</Typography.Link>
-							</Space>
-						</>
-					)}
-				>
-					{sizeList.map((item) => (
-						<Option key={item}>{item}</Option>
-					))}
-				</Select>
+				<Form form={form} component={false}>
+					<Table
+						components={{
+							body: {
+								cell: EditableCell,
+							},
+						}}
+						bordered
+						rowSelection={{
+							type: 'radio',
+							...rowSelection,
+						}}
+						columns={mergedColumns}
+						dataSource={sizeList}
+						pagination={false}
+					/>
+				</Form>
 			</Modal>
 		</Container>
 	);
