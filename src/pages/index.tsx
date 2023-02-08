@@ -8,7 +8,7 @@ import { UserContext } from '../contexts/UserContext';
 import xmlService from '../services/xmlService';
 
 export const getServerSideProps = async () => {
-	const xmlConfig = await xmlService.findFiles();
+	const xmlConfig = await xmlService.findXmlConfig();
 
 	return {
 		props: {

@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../../contexts/UserContext';
 import { Container } from './styles';
-import { PlusOutlined } from '@ant-design/icons';
 import {
 	Modal,
 	Table,
@@ -11,113 +10,35 @@ import {
 	InputNumber,
 	Typography,
 	Popconfirm,
-	EditableContext,
 } from 'antd';
 //import 'antd/dist/antd.css';
 
-const EditableRow = ({ index, ...props }) => {
-	const [form] = Form.useForm();
-	return (
-		<Form form={form} component={false}>
-			<EditableContext.Provider value={form}>
-				<tr {...props} />
-			</EditableContext.Provider>
-		</Form>
-	);
-};
-
-const EditableCell = ({
-	editing,
-	dataIndex,
-	title,
-	inputType,
-	record,
-	index,
-	children,
-	...restProps
-}) => {
-	const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
-	return (
-		<td {...restProps}>
-			{editing ? (
-				<Form.Item
-					name={dataIndex}
-					style={{
-						margin: 0,
-					}}
-					rules={[
-						{
-							required: true,
-							message: `Please Input ${title}!`,
-						},
-					]}
-				>
-					{inputNode}
-				</Form.Item>
-			) : (
-				children
-			)}
-		</td>
-	);
-};
-
-export function TableModal({ open, setOpen, selectedRowKeys }) {
+export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 	const { xmlData } = useContext(UserContext);
 	const [newSize, setNewSize] = useState('');
 	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [sizeSelected, setSizeSelected] = useState('');
 	const [sizeList, setSizeList] = useState([]);
+	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
 	const [form] = Form.useForm();
 
 	const [editingKey, setEditingKey] = useState('');
 
-	const isEditing = (record) => record.key === editingKey;
-
-	const edit = (record) => {
-		form.setFieldsValue({
-			name: '',
-			age: '',
-			address: '',
-			...record,
-		});
-		setEditingKey(record.key);
-	};
-
-	const cancel = () => {
-		setEditingKey('');
-	};
-
-	const save = async (key) => {
-		try {
-			const row = await form.validateFields();
-			const newData = [...sizeList];
-			const index = newData.findIndex((item) => key === item.key);
-			if (index > -1) {
-				const item = newData[index];
-				newData.splice(index, 1, {
-					...item,
-					...row,
-				});
-				setSizeList(newData);
-				setEditingKey('');
-			} else {
-				newData.push(row);
-				setSizeList(newData);
-				setEditingKey('');
-			}
-		} catch (errInfo) {
-			console.log('Validate Failed:', errInfo);
-		}
-	};
-
 	useEffect(() => {
-		if (xmlData.xmlConfig) {
-			setSizeList(xmlData.xmlConfig);
-		}
-	}, [xmlData]);
-
-	console.log('open = ', open);
+		//findmany
+		const submitData = async () => {
+			const response = await fetch('/api/xmlConfig/', {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' },
+			});
+			const resp = await response.json();
+			console.log('Lista de sizes');
+			console.log(resp);
+			setSizeList(resp);
+		};
+		submitData();
+	}, [setSizeList]);
 
 	const handleModalOk = () => {
 		setConfirmLoading(true);
@@ -177,7 +98,7 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		{
 			title: 'Largura',
 			dataIndex: 'oldSizeX',
-			key: 'oldSizeX',
+			key: 'id',
 			width: '12%',
 			editable: true,
 			sorter: (a, b) => a.oldSizeX - b.oldSizeX,
@@ -187,6 +108,7 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		{
 			title: 'Altura',
 			dataIndex: 'oldSizeY',
+			key: 'oldSizeY',
 			width: '12%',
 			editable: true,
 			sorter: (a, b) => a.oldSizeY - b.oldSizeY,
@@ -235,11 +157,12 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 			fixed: 'right',
 			width: 100,
 			render: (_, record) => {
-				const editable = isEditing(record);
+				<a>edit</a>;
+				/* const editable = isEditing(record.id);
 				return editable ? (
 					<span>
 						<Typography.Link
-							onClick={() => save(record.key)}
+							onClick={() => save(record.id)}
 							style={{
 								marginRight: 8,
 							}}
@@ -253,11 +176,11 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 				) : (
 					<Typography.Link
 						disabled={editingKey !== ''}
-						onClick={() => edit(record)}
+						onClick={() => edit(record.id)}
 					>
 						Edit
 					</Typography.Link>
-				);
+				); */
 			},
 		},
 	];
@@ -271,23 +194,11 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 				selectedRows
 			);
 		},
+		getCheckboxProps: (record) => ({
+			disabled: record.name === 'Disabled User', // Column configuration not to be checked
+			name: record.name,
+		}),
 	};
-
-	const mergedColumns = columns.map((col) => {
-		if (!col.editable) {
-			return col;
-		}
-		return {
-			...col,
-			onCell: (record) => ({
-				record,
-				inputType: 'number',
-				dataIndex: col.dataIndex,
-				title: col.title,
-				editing: isEditing(record),
-			}),
-		};
-	});
 
 	return (
 		<Container>
@@ -305,17 +216,12 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 				</p>
 				<Form form={form} component={false}>
 					<Table
-						components={{
-							body: {
-								cell: EditableCell,
-							},
-						}}
 						bordered
 						rowSelection={{
 							type: 'radio',
 							...rowSelection,
 						}}
-						columns={mergedColumns}
+						columns={columns}
 						dataSource={sizeList}
 						pagination={false}
 					/>
