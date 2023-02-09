@@ -1,33 +1,39 @@
 import { database } from '../adapters/database';
 
-const findFiles = async () => {
-	const files = await database.XmlConfig.findMany({});
+const findXmlConfig = async () => {
+	const xmlConfig = await database.XmlConfig.findMany({});
 
-	return files;
+	return xmlConfig;
 };
 
-const findByUser = async (userId) => {
-	const user = await database.user.findUnique({
-		where: {
-			id: userId,
+const createXmlConfig = async () => {
+	const newXmlConfig = database.XmlConfig.create({
+		data: {
+			oldSizeX: 0,
+			oldSizeY: 0,
+			newSizeX: 0,
+			newSizeY: 0,
+			limitLeft: 0,
+			limitRight: 0,
 		},
-		include: { files: true },
 	});
-
-	if (user) {
-		return user.files;
-	}
-	return [];
+	return newXmlConfig;
 };
 
-const findCategories = async () => {
-	const categories = await database.fileCategory.findMany({});
-
-	return categories;
+const updateXmlConfig = async (postId, req) => {
+	const xmlConfig = database.XmlConfig.update({
+		where: {
+			key: postId,
+		},
+		data: {
+			...req.body,
+		},
+	});
+	return xmlConfig;
 };
 
 const findSlug = async (fileSlug) => {
-	const file = await database.file.findUnique({
+	const file = await database.XmlConfig.findUnique({
 		where: {
 			slug: fileSlug,
 		},
@@ -36,49 +42,22 @@ const findSlug = async (fileSlug) => {
 	return file;
 };
 
-const fileDelete = async (filename) => {
-	const name = await database.file.delete({
+const deleteXmlConfig = async (postId) => {
+	const xml = await database.XmlConfig.delete({
 		where: {
-			name: filename,
+			key: postId,
 		},
 	});
 
-	return name;
-};
-
-const create = async (file) => {
-	const { email } = file;
-
-	const user = await database.user.findUnique({
-		where: {
-			email,
-		},
-	});
-
-	if (user) {
-		return database.file.create({
-			data: {
-				title: file.title,
-				name: file.name,
-				slug: file.slug,
-				icon: file.icon,
-				type: file.type,
-				size: file.size,
-				userId: user.id,
-			},
-		});
-	} else {
-		return ' falha de usuario';
-	}
+	return xml;
 };
 
 const defaultFunctions = {
-	findFiles,
-	findCategories,
-	create,
+	findXmlConfig,
+	createXmlConfig,
+	updateXmlConfig,
+	deleteXmlConfig,
 	findSlug,
-	findByUser,
-	fileDelete,
 };
 
 export default defaultFunctions;

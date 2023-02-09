@@ -1,7 +1,6 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { UserContext } from '../../../contexts/UserContext';
 import { Container } from './styles';
-import { PlusOutlined } from '@ant-design/icons';
 import {
 	Modal,
 	Table,
@@ -11,20 +10,11 @@ import {
 	InputNumber,
 	Typography,
 	Popconfirm,
-	EditableContext,
+	Tag,
+	Checkbox,
+	Switch,
 } from 'antd';
-//import 'antd/dist/antd.css';
-
-const EditableRow = ({ index, ...props }) => {
-	const [form] = Form.useForm();
-	return (
-		<Form form={form} component={false}>
-			<EditableContext.Provider value={form}>
-				<tr {...props} />
-			</EditableContext.Provider>
-		</Form>
-	);
-};
+import Draggable from 'react-draggable';
 
 const EditableCell = ({
 	editing,
@@ -36,7 +26,12 @@ const EditableCell = ({
 	children,
 	...restProps
 }) => {
-	const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+	const inputNode =
+		inputType === 'number' ? (
+			<InputNumber />
+		) : (
+			<Switch defaultChecked={record?.hasRightMenu} />
+		);
 	return (
 		<td {...restProps}>
 			{editing ? (
@@ -61,24 +56,28 @@ const EditableCell = ({
 	);
 };
 
-export function TableModal({ open, setOpen, selectedRowKeys }) {
-	const { xmlData } = useContext(UserContext);
-	const [newSize, setNewSize] = useState('');
+export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
+	const { xmlData, setXmlData } = useContext(UserContext);
 	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [sizeSelected, setSizeSelected] = useState('');
-	const [sizeList, setSizeList] = useState([]);
-
+	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+	const [disabled, setDisabled] = useState(false);
 	const [form] = Form.useForm();
-
 	const [editingKey, setEditingKey] = useState('');
+	const [bounds, setBounds] = useState({
+		left: 0,
+		top: 0,
+		bottom: 0,
+		right: 0,
+	});
+	const draggleRef = useRef(null);
 
-	const isEditing = (record) => record.key === editingKey;
+	const isEditing = (key) => key === editingKey;
 
 	const edit = (record) => {
+		console.log('record');
+		console.log(record.key);
 		form.setFieldsValue({
-			name: '',
-			age: '',
-			address: '',
 			...record,
 		});
 		setEditingKey(record.key);
@@ -89,9 +88,10 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 	};
 
 	const save = async (key) => {
+		//update
 		try {
 			const row = await form.validateFields();
-			const newData = [...sizeList];
+			const newData = [...xmlData.xmlConfig];
 			const index = newData.findIndex((item) => key === item.key);
 			if (index > -1) {
 				const item = newData[index];
@@ -99,11 +99,26 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 					...item,
 					...row,
 				});
-				setSizeList(newData);
-				setEditingKey('');
-			} else {
-				newData.push(row);
-				setSizeList(newData);
+				setXmlData({
+					...xmlData,
+					xmlConfig: newData,
+				});
+				console.log('novos dados');
+				console.log(
+					JSON.stringify({
+						...item,
+						...row,
+					})
+				);
+				await fetch(`/api/xmlConfig/${key}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					where: { key: { key } },
+					body: JSON.stringify({
+						...item,
+						...row,
+					}),
+				});
 				setEditingKey('');
 			}
 		} catch (errInfo) {
@@ -111,13 +126,46 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		}
 	};
 
-	useEffect(() => {
-		if (xmlData.xmlConfig) {
-			setSizeList(xmlData.xmlConfig);
-		}
-	}, [xmlData]);
+	const handleNewSize = () => {
+		//post
+		const submitData = async () => {
+			const response = await fetch('/api/xmlConfig/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+			});
+			const resp = await response.json();
 
-	console.log('open = ', open);
+			console.log('Lista de sizes');
+			console.log(resp);
+
+			const newData = [...xmlData.xmlConfig];
+			newData.push(resp);
+
+			setXmlData({
+				...xmlData,
+				xmlConfig: newData,
+			});
+			form.setFieldsValue({
+				...resp,
+			});
+			setEditingKey(resp.key);
+		};
+		submitData();
+	};
+
+	const handleDeleteSize = async (key) => {
+		await fetch(`/api/xmlConfig/${key}`, {
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json' },
+			where: { key: { key } },
+		});
+
+		const newData = xmlData.xmlConfig.filter((item) => item.key !== key);
+		setXmlData({
+			...xmlData,
+			xmlConfig: newData,
+		});
+	};
 
 	const handleModalOk = () => {
 		setConfirmLoading(true);
@@ -177,7 +225,7 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		{
 			title: 'Largura',
 			dataIndex: 'oldSizeX',
-			key: 'oldSizeX',
+			key: 'id',
 			width: '12%',
 			editable: true,
 			sorter: (a, b) => a.oldSizeX - b.oldSizeX,
@@ -187,6 +235,7 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		{
 			title: 'Altura',
 			dataIndex: 'oldSizeY',
+			key: 'oldSizeY',
 			width: '12%',
 			editable: true,
 			sorter: (a, b) => a.oldSizeY - b.oldSizeY,
@@ -230,12 +279,29 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 			render: (_, { limitRight }) => <>{limitRight} px</>,
 		},
 		{
+			title: 'Margem Dir?',
+			dataIndex: 'hasRightMenu',
+			key: 'hasRightMenu',
+			width: '13%',
+			editable: true,
+			render: (hasRightMenu) => {
+				let color = hasRightMenu ? 'green' : 'volcano';
+				let valor = hasRightMenu ? 'sim' : 'não';
+
+				return (
+					<Tag color={color} key={hasRightMenu}>
+						{valor.toUpperCase()}
+					</Tag>
+				);
+			},
+		},
+		{
 			title: 'Action',
 			key: 'operation',
 			fixed: 'right',
 			width: 100,
 			render: (_, record) => {
-				const editable = isEditing(record);
+				const editable = isEditing(record.key);
 				return editable ? (
 					<span>
 						<Typography.Link
@@ -251,12 +317,24 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 						</Popconfirm>
 					</span>
 				) : (
-					<Typography.Link
-						disabled={editingKey !== ''}
-						onClick={() => edit(record)}
-					>
-						Edit
-					</Typography.Link>
+					<span>
+						<Typography.Link
+							disabled={editingKey !== ''}
+							onClick={() => edit(record)}
+							style={{
+								marginRight: 8,
+							}}
+						>
+							Editar
+						</Typography.Link>
+						<Popconfirm
+							disabled={editingKey !== ''}
+							title='Confirma apagar?'
+							onConfirm={() => handleDeleteSize(record.key)}
+						>
+							<a>Apagar</a>
+						</Popconfirm>
+					</span>
 				);
 			},
 		},
@@ -277,28 +355,87 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 		if (!col.editable) {
 			return col;
 		}
+
 		return {
 			...col,
-			onCell: (record) => ({
-				record,
-				inputType: 'number',
-				dataIndex: col.dataIndex,
-				title: col.title,
-				editing: isEditing(record),
-			}),
+			onCell: (record) => {
+				return {
+					record,
+					inputType:
+						col.dataIndex === 'hasRightMenu' ? 'boolean' : 'number',
+					dataIndex: col.dataIndex,
+					title: col.title,
+					editing: isEditing(record.key),
+				};
+			},
 		};
 	});
+
+	const onStart = (_event, uiData) => {
+		const { clientWidth, clientHeight } = window.document.documentElement;
+		const targetRect = draggleRef.current?.getBoundingClientRect();
+		if (!targetRect) {
+			return;
+		}
+		setBounds({
+			left: -targetRect.left + uiData.x,
+			right: clientWidth - (targetRect.right - uiData.x),
+			top: -targetRect.top + uiData.y,
+			bottom: clientHeight - (targetRect.bottom - uiData.y),
+		});
+	};
 
 	return (
 		<Container>
 			<Modal
-				title='Seleção dos ajustes da tela'
+				title={
+					<div
+						style={{
+							width: '100%',
+							cursor: 'move',
+						}}
+						onMouseOver={() => {
+							if (disabled) {
+								setDisabled(false);
+							}
+						}}
+						onMouseOut={() => {
+							setDisabled(true);
+						}}
+					>
+						Seleção dos ajustes da tela
+					</div>
+				}
 				open={open}
-				onOk={handleModalOk}
-				onCancel={handleModalCancel}
 				confirmLoading={confirmLoading}
 				width={1000}
 				centered
+				modalRender={(modal) => (
+					<Draggable
+						disabled={disabled}
+						bounds={bounds}
+						onStart={(event, uiData) => onStart(event, uiData)}
+					>
+						<div ref={draggleRef}>{modal}</div>
+					</Draggable>
+				)}
+				footer={[
+					<Button key='add' type='primary' onClick={handleNewSize}>
+						Novo ajuste
+					</Button>,
+
+					<Button key='back' onClick={handleModalCancel}>
+						Cancel
+					</Button>,
+					<Button
+						key='submit'
+						type='primary'
+						loading={confirmLoading}
+						onClick={handleModalOk}
+					>
+						Ok
+					</Button>,
+				]}
 			>
 				<p>
 					Selecione o novo tamanho de tela para os worldmaps marcados.
@@ -316,7 +453,7 @@ export function TableModal({ open, setOpen, selectedRowKeys }) {
 							...rowSelection,
 						}}
 						columns={mergedColumns}
-						dataSource={sizeList}
+						dataSource={xmlData.xmlConfig}
 						pagination={false}
 					/>
 				</Form>
