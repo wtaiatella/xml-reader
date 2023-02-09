@@ -248,5 +248,34 @@
       "form": []
     },
     "tests": []
+  },
+  {
+    "_id": "049bc1c8-f061-4902-b7d7-e0c2028c4a90",
+    "colId": "history",
+    "containerId": "",
+    "name": "http://localhost:3000/api/xmlConfig/cldvxgbvg0000qicedav2rvhi",
+    "url": "http://localhost:3000/api/xmlConfig/cldvxgbvg0000qicedav2rvhi",
+    "method": "PUT",
+    "sortNum": 0,
+    "created": "2023-02-09T12:51:46.793Z",
+    "modified": "2023-02-09T12:51:46.793Z",
+    "headers": [
+      {
+        "name": "User-Agent",
+        "value": "Thunder Client (https://www.thunderclient.com)",
+        "isDisabled": true
+      },
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\"key\":\"cldvxgbvg0000qicedav2rvhi\",\"oldSizeX\":101,\"oldSizeY\":200,\"newSizeX\":300,\"newSizeY\":400,\"limitLeft\":500,\"limitRight\":250,\"hasRightMenu\":false}",
+      "form": []
+    },
+    "tests": []
   }
 ]

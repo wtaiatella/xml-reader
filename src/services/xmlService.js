@@ -23,7 +23,7 @@ const createXmlConfig = async () => {
 const updateXmlConfig = async (postId, req) => {
 	const xmlConfig = database.XmlConfig.update({
 		where: {
-			id: postId,
+			key: postId,
 		},
 		data: {
 			...req.body,
@@ -45,7 +45,7 @@ const findSlug = async (fileSlug) => {
 const deleteXmlConfig = async (postId) => {
 	const xml = await database.XmlConfig.delete({
 		where: {
-			id: postId,
+			key: postId,
 		},
 	});
 

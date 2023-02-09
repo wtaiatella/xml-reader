@@ -2,7 +2,8 @@ import xmlService from '../../../services/xmlService';
 
 export default async function handle(req, res) {
 	const postId = req.query.id;
-
+	console.log('Id recebida');
+	console.log(postId);
 	if (req.method === 'DELETE') {
 		const xml = await xmlService.deleteXmlConfig(postId);
 

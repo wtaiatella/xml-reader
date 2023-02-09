@@ -10,7 +10,7 @@ datasource db {
 
 
 model XmlConfig {
-  id          String  @default(cuid())  @id
+  key          String @default(cuid())  @id
   oldSizeX       Float  
   oldSizeY       Float   
   newSizeX       Float?   

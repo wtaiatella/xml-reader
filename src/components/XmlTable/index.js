@@ -270,7 +270,7 @@ export function XmlTable() {
 								onClick={() => handleEdit(selectedRowKeys)}
 								disabled={!hasSelected}
 							>
-								Reload
+								Editar Seleção
 							</Button>
 							<span
 								style={{
