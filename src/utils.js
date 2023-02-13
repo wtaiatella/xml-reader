@@ -7,14 +7,17 @@ const ConfigXmlData = (file, setXmlData, xmlData) => {
 		const parser = new DOMParser();
 		const xml = parser.parseFromString(readerData, 'text/xml');
 
+		const xmlWorldmaps = xml.getElementsByTagName('Worldmap');
+		const quantWorldmaps = xmlWorldmaps.length;
+
+		const xlsWorldgroup = xml.getElementsByTagName('WmGroup');
+		const worldgroupName = xlsWorldgroup[0].getAttribute('Name');
+		const quantWorldGroups = xlsWorldgroup.length;
+
 		//console.log(xmlWorldmap);
 		console.log('XML resultant do parser');
 		console.log(xml);
 		console.log(xml.getElementsByTagName('Worldmap'));
-		const xmlWorldmaps = xml.getElementsByTagName('Worldmap');
-		const xmlWmGroup = xml
-			.getElementsByTagName('WmGroup')[0]
-			.getAttribute('Name');
 
 		let listGoViews = [];
 
@@ -61,16 +64,9 @@ const ConfigXmlData = (file, setXmlData, xmlData) => {
 			fileName: file.name,
 			xml: xml,
 			worldmaps: xmlWorldmaps,
-			xmlWmGroup,
-			posAtual: 0,
-			quantidade: xmlWorldmaps.length,
-			Name: xmlWorldmaps[0].getAttribute('Name'),
-			ZoomFactor: xmlWorldmaps[0].getAttribute('ZoomFactor'),
-			Width: xmlWorldmaps[0].getAttribute('Width'),
-			PixelRatio: xmlWorldmaps[0].getAttribute('PixelRatio'),
-			MaxY: xmlWorldmaps[0].getAttribute('MaxY'),
-			MaxX: xmlWorldmaps[0].getAttribute('MaxX'),
-			Height: xmlWorldmaps[0].getAttribute('Height'),
+			worldgroupName,
+			quantWorldmaps,
+			quantWorldGroups,
 		});
 	};
 };

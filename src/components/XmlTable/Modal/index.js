@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { UserContext } from '../../../contexts/UserContext';
 import { Container } from './styles';
 import {
@@ -11,9 +11,12 @@ import {
 	Typography,
 	Popconfirm,
 	Tag,
-	Checkbox,
 	Switch,
+	Highlighter,
+	Space,
 } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+
 import Draggable from 'react-draggable';
 
 const EditableCell = ({
@@ -57,10 +60,13 @@ const EditableCell = ({
 };
 
 export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
-	const { xmlData, setXmlData } = useContext(UserContext);
+	const { xmlData, setXmlData, worldmapsTable, setWorldmapsTable } =
+		useContext(UserContext);
+	const [searchText, setSearchText] = useState('');
+	const [searchedColumn, setSearchedColumn] = useState('');
+	const searchInput = useRef(null);
 	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [sizeSelected, setSizeSelected] = useState('');
-	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	const [disabled, setDisabled] = useState(false);
 	const [form] = Form.useForm();
 	const [editingKey, setEditingKey] = useState('');
@@ -168,41 +174,76 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 	};
 
 	const handleModalOk = () => {
-		setConfirmLoading(true);
+		//setConfirmLoading(true);
 
-		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap');
-		console.log('Modal OK');
+		console.log('Tela Modal button OK');
 		console.log(sizeSelected);
-		console.log(xmlWorldmap);
-		console.log(selectedRowKeys);
-
-		const sizeXY = sizeSelected.split('x');
-		const sizeX = sizeXY[0];
-		const sizeY = sizeXY[1];
-
-		for (let selectedWorldmap of selectedRowKeys) {
-			for (let worldmap of xmlWorldmap) {
+		console.log(selectedWorldmapsKeys);
+		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap');
+		for (let worldmap of xmlWorldmap) {
+			for (let selectedWorldmap of selectedWorldmapsKeys) {
 				console.log('selectedWorldmap: ', selectedWorldmap);
-				console.log(
-					'worldmap.getAttribute(Name): ',
-					worldmap.getAttribute('Name')
-				);
+				console.log('worldmap.Name: ', worldmap.getAttribute('Name'));
 
 				if (selectedWorldmap === worldmap.getAttribute('Name')) {
-					worldmap.setAttribute('Width', sizeX);
-					worldmap.setAttribute('MaxX', sizeX);
-					worldmap.setAttribute('Height', sizeY);
-					worldmap.setAttribute('MaxY', sizeY);
+					const oldSizeX = worldmap.getAttribute('Width');
 
-					const xmlGoView = worldmap.getElementsByTagName('GoView');
+					worldmap.setAttribute('Width', sizeSelected.newSizeX);
+					worldmap.setAttribute('MaxX', sizeSelected.newSizeX);
+					worldmap.setAttribute('Height', sizeSelected.newSizeY);
+					worldmap.setAttribute('MaxY', sizeSelected.newSizeY);
 
-					for (let goView of xmlGoView) {
-						goView.setAttribute('Width', sizeX);
-						goView.setAttribute('Height', sizeY);
-						goView.setAttribute('top', 0);
-						goView.setAttribute('left', 0);
+					const xmlWorldmapChildrem = worldmap.children;
+					console.log(xmlWorldmapChildrem);
+
+					for (let child of worldmap.children) {
+						const name = child.tagName;
+						console.log('Nome do Nó = ', name);
+						if (name == 'GoView') {
+							child.setAttribute('Width', sizeSelected.newSizeX);
+							child.setAttribute('Height', sizeSelected.newSizeY);
+							child.setAttribute('Top', 0);
+							child.setAttribute('Left', 0);
+						} else {
+							const posX = child.getAttribute('left');
+							if (
+								posX >= sizeSelected.limitRight &&
+								sizeSelected.hasRightMenu
+							) {
+								child.setAttribute(
+									'left',
+									posX + sizeSelected.newSizeX - oldSizeX
+								);
+							} else if (posX >= sizeSelected.limitLeft) {
+								child.setAttribute(
+									'left',
+									posX +
+										(sizeSelected.newSizeX - oldSizeX) / 2
+								);
+							}
+						}
 					}
 
+					const newWorldmapsTable = worldmapsTable.map(
+						(worldmapTable) => {
+							if (worldmapTable.Name == selectedWorldmap) {
+								worldmapTable.newSizeX = sizeSelected.newSizeX;
+								worldmapTable.newSizeY = sizeSelected.newSizeY;
+								worldmapTable.limitLeft =
+									sizeSelected.limitLeft;
+								worldmapTable.limitRight =
+									sizeSelected.limitRight;
+								worldmapTable.hasRightMenu =
+									sizeSelected.hasRightMenu;
+							}
+							return worldmapTable;
+						}
+					);
+
+					console.log('Nova tabela worldmaps');
+					console.log(newWorldmapsTable);
+
+					setWorldmapsTable(newWorldmapsTable);
 					console.log(`Worlmap atualizado`);
 					console.log(worldmap);
 					console.log(xmlData.xml.getElementsByTagName('Worldmap'));
@@ -221,6 +262,109 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 		setOpen(false);
 	};
 
+	const handleSearch = (selectedKeys, confirm, dataIndex) => {
+		confirm();
+		setSearchText(selectedKeys[0]);
+		setSearchedColumn(dataIndex);
+	};
+
+	const handleReset = async (clearFilters) => {
+		clearFilters();
+		setSearchText('');
+	};
+
+	const getColumnSearchProps = (dataIndex) => ({
+		filterDropdown: ({
+			setSelectedKeys,
+			selectedKeys,
+			confirm,
+			clearFilters,
+			filters = 1000,
+		}) => {
+			return (
+				<div style={{ padding: 8 }}>
+					<Input
+						ref={searchInput}
+						placeholder={`Buscar ${dataIndex}`}
+						value={selectedKeys[0]}
+						allowClear
+						onChange={(e) =>
+							setSelectedKeys(
+								e.target.value ? [e.target.value] : []
+							)
+						}
+						onPressEnter={() =>
+							handleSearch(selectedKeys, confirm, dataIndex)
+						}
+						//style={{ marginBottom: 8, display: 'block' }}
+						style={{
+							marginBottom: 8,
+							display: 'block',
+							width: '300',
+							padding: '10px',
+						}}
+					/>
+					<Space>
+						<Button
+							type='primary'
+							onClick={() =>
+								handleSearch(selectedKeys, confirm, dataIndex)
+							}
+							icon={<SearchOutlined />}
+							size='small'
+							style={{ width: 90 }}
+						>
+							Buscar
+						</Button>
+						<Button
+							onClick={async () => {
+								clearFilters &&
+									(await handleReset(clearFilters));
+								confirm({ closeDropdown: true });
+								setSearchedColumn(dataIndex);
+							}}
+							size='small'
+							style={{ width: 90 }}
+						>
+							Reset
+						</Button>
+					</Space>
+				</div>
+			);
+		},
+		filterIcon: (filtered) => (
+			<SearchOutlined
+				style={{ color: filtered ? '#1890ff' : undefined }}
+			/>
+		),
+		onFilter: (value, record) => {
+			console.log(record);
+			console.log(dataIndex);
+
+			return record[dataIndex]
+				.toString()
+				.toLowerCase()
+				.includes(value.toLowerCase());
+		},
+
+		onFilterDropdownOpenChange: (visible) => {
+			if (visible) {
+				setTimeout(() => searchInput.current?.select(), 100);
+			}
+		},
+		render: (text) =>
+			searchedColumn === dataIndex ? (
+				<Highlighter
+					highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+					searchWords={[searchText]}
+					autoEscape
+					textToHighlight={text ? text.toString() : ''}
+				/>
+			) : (
+				text
+			),
+	});
+
 	const columns = [
 		{
 			title: 'Largura',
@@ -230,6 +374,7 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			editable: true,
 			sorter: (a, b) => a.oldSizeX - b.oldSizeX,
 			sortDirections: ['descend', 'ascend'],
+			...getColumnSearchProps('oldSizeX'),
 			render: (_, { oldSizeX }) => <>{oldSizeX} px</>,
 		},
 		{
@@ -240,6 +385,7 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			editable: true,
 			sorter: (a, b) => a.oldSizeY - b.oldSizeY,
 			sortDirections: ['descend', 'ascend'],
+			...getColumnSearchProps('oldSizeY'),
 			render: (_, { oldSizeY }) => <>{oldSizeY} px</>,
 		},
 		{
@@ -348,6 +494,7 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 				'selectedRows: ',
 				selectedRows
 			);
+			setSizeSelected(selectedRows[0]);
 		},
 	};
 

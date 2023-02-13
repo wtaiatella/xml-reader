@@ -2,7 +2,7 @@ import { useContext, useRef, useState, useEffect } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Input, Space, Table } from 'antd';
+import { Button, Input, Space, Table, Tag } from 'antd';
 
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
@@ -16,11 +16,30 @@ export function XmlTable() {
 	const [openModal, setOpenModal] = useState(false);
 	const [showTable, setShowTable] = useState(false);
 
-	const { xmlData } = useContext(UserContext);
+	const { xmlData, setXmlData, worldmapsTable, setWorldmapsTable } =
+		useContext(UserContext);
 
 	useEffect(() => {
 		if (xmlData.xml) {
 			setShowTable(true);
+			let data = [];
+			for (let item of xmlData.worldmaps) {
+				data = [
+					...data,
+					{
+						key: item.getAttribute('Name'),
+						Name: item.getAttribute('Name'),
+						Width: item.getAttribute('Width'),
+						Height: item.getAttribute('Height'),
+						newSizeX: 0,
+						newSizeY: 0,
+						limitLeft: 0,
+						limitRight: 0,
+						hasRightMenu: 0,
+					},
+				];
+			}
+			setWorldmapsTable(data);
 		} else {
 			setShowTable(false);
 		}
@@ -40,26 +59,6 @@ export function XmlTable() {
 	console.log('Carregando dados');
 	console.log(xmlData.worldmaps);
 	console.log(xmlData.xmlConfig);
-
-	let data = [];
-
-	if (xmlData.xml) {
-		for (let item of xmlData.worldmaps) {
-			data = [
-				...data,
-				{
-					key: item.getAttribute('Name'),
-					Name: item.getAttribute('Name'),
-					ZoomFactor: item.getAttribute('ZoomFactor'),
-					Width: item.getAttribute('Width'),
-					PixelRatio: item.getAttribute('PixelRatio'),
-					MaxY: item.getAttribute('MaxY'),
-					MaxX: item.getAttribute('MaxX'),
-					Height: item.getAttribute('Height'),
-				},
-			];
-		}
-	}
 
 	const handleEdit = (keys) => {
 		console.log(keys);
@@ -174,13 +173,6 @@ export function XmlTable() {
 		},
 
 		{
-			title: 'ZoomFactor',
-			dataIndex: 'ZoomFactor',
-			key: 'ZoomFactor',
-			width: '12%',
-		},
-
-		{
 			title: 'Width',
 			dataIndex: 'Width',
 			key: 'Width',
@@ -199,22 +191,57 @@ export function XmlTable() {
 			render: (_, { Height }) => <>{Height} px</>,
 		},
 		{
-			title: 'MaxX',
-			dataIndex: 'MaxX',
-			key: 'MaxX',
-			width: '12%',
-			sorter: (a, b) => a.MaxX - b.MaxX,
+			title: 'Nova Larg',
+			dataIndex: 'newSizeX',
+			key: 'newSizeX',
+			width: '13%',
+			editable: true,
+			sorter: (a, b) => a.newSizeX - b.newSizeX,
 			sortDirections: ['descend', 'ascend'],
-			render: (_, { MaxX }) => <>{MaxX} px</>,
+			render: (_, { newSizeX }) => <>{newSizeX} px</>,
 		},
 		{
-			title: 'MaxY',
-			dataIndex: 'MaxY',
-			key: 'MaxY',
-			width: '12%',
-			sorter: (a, b) => a.MaxY - b.MaxY,
+			title: 'Nova Alt',
+			dataIndex: 'newSizeY',
+			key: 'newSizeY',
+			width: '13%',
+			editable: true,
+			sorter: (a, b) => a.newSizeY - b.newSizeY,
 			sortDirections: ['descend', 'ascend'],
-			render: (_, { MaxY }) => <>{MaxY} px</>,
+			render: (_, { newSizeY }) => <>{newSizeY} px</>,
+		},
+		{
+			title: 'Margem Esq',
+			dataIndex: 'limitLeft',
+			key: 'limitLeft',
+			width: '13%',
+			editable: true,
+			render: (_, { limitLeft }) => <>{limitLeft} px</>,
+		},
+		{
+			title: 'Margem Dir',
+			dataIndex: 'limitRight',
+			key: 'limitRight',
+			width: '13%',
+			editable: true,
+			render: (_, { limitRight }) => <>{limitRight} px</>,
+		},
+		{
+			title: 'Margem Dir?',
+			dataIndex: 'hasRightMenu',
+			key: 'hasRightMenu',
+			width: '13%',
+			editable: true,
+			render: (hasRightMenu) => {
+				let color = hasRightMenu ? 'green' : 'volcano';
+				let valor = hasRightMenu ? 'sim' : 'não';
+
+				return (
+					<Tag color={color} key={hasRightMenu}>
+						{valor.toUpperCase()}
+					</Tag>
+				);
+			},
 		},
 		{
 			title: 'Action',
@@ -261,7 +288,7 @@ export function XmlTable() {
 				<>
 					<div className='headerTable'>
 						<p>Arquivo: {xmlData.fileName}</p>
-						<p>Grupo de Worldmaps: {xmlData.xmlWmGroup}</p>
+						<p>Grupo de Worldmaps: {xmlData.worldgroupName}</p>
 					</div>
 					<div className='buttonsTable'>
 						<div className='buttonEdit'>
@@ -295,7 +322,7 @@ export function XmlTable() {
 						className='tableData'
 						rowSelection={rowSelection}
 						columns={columns}
-						dataSource={data}
+						dataSource={worldmapsTable}
 						pagination={false}
 						scroll={{ x: 1000 }}
 					/>
@@ -303,7 +330,7 @@ export function XmlTable() {
 					<TableModal
 						open={openModal}
 						setOpen={() => setOpenModal()}
-						selectedRowKeys={selectedRowKeys}
+						selectedWorldmapsKeys={selectedRowKeys}
 					/>
 				</>
 			) : (
