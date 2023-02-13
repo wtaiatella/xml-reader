@@ -3,30 +3,24 @@ import { createContext, useState } from 'react';
 export const UserContext = createContext();
 
 export const UserStorage = ({ children }) => {
-	const [sizes, setSizes] = useState('');
+	const [worldmapsTable, setWorldmapsTable] = useState([]);
 	const [xmlData, setXmlData] = useState({
 		fileName: '',
 		xml: null,
 		worldmaps: null,
-		posAtual: 0,
-		quantidade: 0,
-		Name: '',
-		ZoomFactor: '0',
-		Width: '0',
-		PixelRatio: '0',
-		MaxY: '0',
-		MaxX: '0',
-		Height: '0',
+		worldgroupName: '',
+		quantWorldmaps: 0,
+		quantWorldGroups: 0,
 		xmlConfig: [],
 	});
 
 	return (
 		<UserContext.Provider
 			value={{
-				sizes,
-				setSizes,
 				xmlData,
 				setXmlData,
+				worldmapsTable,
+				setWorldmapsTable,
 			}}
 		>
 			{children}
