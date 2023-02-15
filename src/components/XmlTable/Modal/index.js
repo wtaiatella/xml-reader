@@ -62,12 +62,13 @@ const EditableCell = ({
 export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 	const { xmlData, setXmlData, worldmapsTable, setWorldmapsTable } =
 		useContext(UserContext);
-	const [searchText, setSearchText] = useState('');
 	const [searchedColumn, setSearchedColumn] = useState('');
 	const searchInput = useRef(null);
 	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [sizeSelected, setSizeSelected] = useState('');
 	const [disabled, setDisabled] = useState(false);
+	const [filterActive, setFilterActive] = useState(false);
+	const [preFilterValue, setPreFilterValue] = useState({});
 	const [form] = Form.useForm();
 	const [editingKey, setEditingKey] = useState('');
 	const [bounds, setBounds] = useState({
@@ -77,6 +78,26 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 		right: 0,
 	});
 	const draggleRef = useRef(null);
+
+	useEffect(() => {
+		//recebe os dados larg e altura e seta prefiltro
+		if (open) {
+			console.log('Abertura do Modal');
+			console.log(selectedWorldmapsKeys);
+			console.log(
+				worldmapsTable.find(
+					(worldmap) => worldmap.key == selectedWorldmapsKeys[0]
+				)
+			);
+
+			setPreFilterValue(
+				worldmapsTable.find(
+					(worldmap) => worldmap.key == selectedWorldmapsKeys[0]
+				)
+			);
+			setFilterActive(true);
+		}
+	}, [open, selectedWorldmapsKeys, worldmapsTable]);
 
 	const isEditing = (key) => key === editingKey;
 
@@ -138,6 +159,14 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			const response = await fetch('/api/xmlConfig/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					Width: parseInt(preFilterValue.Width),
+					Height: parseInt(preFilterValue.Height),
+					newSizeX: 0,
+					newSizeY: 0,
+					limitLeft: 0,
+					limitRight: 0,
+				}),
 			});
 			const resp = await response.json();
 
@@ -186,7 +215,7 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 				console.log('worldmap.Name: ', worldmap.getAttribute('Name'));
 
 				if (selectedWorldmap === worldmap.getAttribute('Name')) {
-					const oldSizeX = worldmap.getAttribute('Width');
+					const Width = worldmap.getAttribute('Width');
 
 					worldmap.setAttribute('Width', sizeSelected.newSizeX);
 					worldmap.setAttribute('MaxX', sizeSelected.newSizeX);
@@ -212,13 +241,12 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 							) {
 								child.setAttribute(
 									'left',
-									posX + sizeSelected.newSizeX - oldSizeX
+									posX + sizeSelected.newSizeX - Width
 								);
 							} else if (posX >= sizeSelected.limitLeft) {
 								child.setAttribute(
 									'left',
-									posX +
-										(sizeSelected.newSizeX - oldSizeX) / 2
+									posX + (sizeSelected.newSizeX - Width) / 2
 								);
 							}
 						}
@@ -260,17 +288,29 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 	const handleModalCancel = () => {
 		console.log('Clicked cancel button');
 		setOpen(false);
+		setSizeSelected('');
+		//setSearchText('');
+		setDisabled(false);
+		setEditingKey('');
+		setPreFilterValue([]);
 	};
 
 	const handleSearch = (selectedKeys, confirm, dataIndex) => {
+		console.log('Botão Buscar');
+		console.log(selectedKeys[0]);
 		confirm();
-		setSearchText(selectedKeys[0]);
+		//setSearchText(selectedKeys[0]);
 		setSearchedColumn(dataIndex);
+		setPreFilterValue({
+			...preFilterValue,
+			[dataIndex]: selectedKeys[0],
+		});
 	};
 
 	const handleReset = async (clearFilters) => {
 		clearFilters();
-		setSearchText('');
+		//setSearchText('');
+		setPreFilterValue([]);
 	};
 
 	const getColumnSearchProps = (dataIndex) => ({
@@ -279,7 +319,6 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			selectedKeys,
 			confirm,
 			clearFilters,
-			filters = 1000,
 		}) => {
 			return (
 				<div style={{ padding: 8 }}>
@@ -300,7 +339,6 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 						style={{
 							marginBottom: 8,
 							display: 'block',
-							width: '300',
 							padding: '10px',
 						}}
 					/>
@@ -338,13 +376,15 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			/>
 		),
 		onFilter: (value, record) => {
+			console.log('Carregando o filtro');
 			console.log(record);
 			console.log(dataIndex);
+			console.log(value);
 
 			return record[dataIndex]
 				.toString()
 				.toLowerCase()
-				.includes(value.toLowerCase());
+				.includes(value.toString().toLowerCase());
 		},
 
 		onFilterDropdownOpenChange: (visible) => {
@@ -356,7 +396,11 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			searchedColumn === dataIndex ? (
 				<Highlighter
 					highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-					searchWords={[searchText]}
+					searchWords={
+						dataIndex == 'Width'
+							? [preFilterValue?.Width]
+							: [preFilterValue?.Height]
+					}
 					autoEscape
 					textToHighlight={text ? text.toString() : ''}
 				/>
@@ -365,126 +409,141 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 			),
 	});
 
-	const columns = [
-		{
-			title: 'Largura',
-			dataIndex: 'oldSizeX',
-			key: 'id',
-			width: '12%',
-			editable: true,
-			sorter: (a, b) => a.oldSizeX - b.oldSizeX,
-			sortDirections: ['descend', 'ascend'],
-			...getColumnSearchProps('oldSizeX'),
-			render: (_, { oldSizeX }) => <>{oldSizeX} px</>,
-		},
-		{
-			title: 'Altura',
-			dataIndex: 'oldSizeY',
-			key: 'oldSizeY',
-			width: '12%',
-			editable: true,
-			sorter: (a, b) => a.oldSizeY - b.oldSizeY,
-			sortDirections: ['descend', 'ascend'],
-			...getColumnSearchProps('oldSizeY'),
-			render: (_, { oldSizeY }) => <>{oldSizeY} px</>,
-		},
-		{
-			title: 'Nova Larg',
-			dataIndex: 'newSizeX',
-			key: 'newSizeX',
-			width: '13%',
-			editable: true,
-			sorter: (a, b) => a.newSizeX - b.newSizeX,
-			sortDirections: ['descend', 'ascend'],
-			render: (_, { newSizeX }) => <>{newSizeX} px</>,
-		},
-		{
-			title: 'Nova Alt',
-			dataIndex: 'newSizeY',
-			key: 'newSizeY',
-			width: '13%',
-			editable: true,
-			sorter: (a, b) => a.newSizeY - b.newSizeY,
-			sortDirections: ['descend', 'ascend'],
-			render: (_, { newSizeY }) => <>{newSizeY} px</>,
-		},
-		{
-			title: 'Margem Esq',
-			dataIndex: 'limitLeft',
-			key: 'limitLeft',
-			width: '13%',
-			editable: true,
-			render: (_, { limitLeft }) => <>{limitLeft} px</>,
-		},
-		{
-			title: 'Margem Dir',
-			dataIndex: 'limitRight',
-			key: 'limitRight',
-			width: '13%',
-			editable: true,
-			render: (_, { limitRight }) => <>{limitRight} px</>,
-		},
-		{
-			title: 'Margem Dir?',
-			dataIndex: 'hasRightMenu',
-			key: 'hasRightMenu',
-			width: '13%',
-			editable: true,
-			render: (hasRightMenu) => {
-				let color = hasRightMenu ? 'green' : 'volcano';
-				let valor = hasRightMenu ? 'sim' : 'não';
+	const columnsfuntion = () => {
+		console.log('Chamada Columns');
+		console.log(preFilterValue);
+		return [
+			{
+				title: 'Width',
+				dataIndex: 'Width',
+				key: 'id',
+				width: '12%',
+				editable: true,
+				sorter: (a, b) => a.Width - b.Width,
+				sortDirections: ['descend', 'ascend'],
+				...getColumnSearchProps('Width'),
+				render: (_, { Width }) => <>{Width} px</>,
+				filteredValue: preFilterValue?.Width
+					? [preFilterValue?.Width]
+					: [],
+				filtered: filterActive,
+			},
+			{
+				title: 'Height',
+				dataIndex: 'Height',
+				key: 'Height',
+				width: '12%',
+				editable: true,
+				sorter: (a, b) => a.Height - b.Height,
+				sortDirections: ['descend', 'ascend'],
+				...getColumnSearchProps('Height'),
+				render: (_, { Height }) => <>{Height} px</>,
+				filteredValue: preFilterValue?.Height
+					? [preFilterValue?.Height]
+					: [],
+			},
+			{
+				title: 'Nova Larg',
+				dataIndex: 'newSizeX',
+				key: 'newSizeX',
+				width: '13%',
+				editable: true,
+				sorter: (a, b) => a.newSizeX - b.newSizeX,
+				sortDirections: ['descend', 'ascend'],
+				render: (_, { newSizeX }) => <>{newSizeX} px</>,
+			},
+			{
+				title: 'Nova Alt',
+				dataIndex: 'newSizeY',
+				key: 'newSizeY',
+				width: '13%',
+				editable: true,
+				sorter: (a, b) => a.newSizeY - b.newSizeY,
+				sortDirections: ['descend', 'ascend'],
+				render: (_, { newSizeY }) => <>{newSizeY} px</>,
+			},
+			{
+				title: 'Margem Esq',
+				dataIndex: 'limitLeft',
+				key: 'limitLeft',
+				width: '13%',
+				editable: true,
+				render: (_, { limitLeft }) => <>{limitLeft} px</>,
+			},
+			{
+				title: 'Margem Dir',
+				dataIndex: 'limitRight',
+				key: 'limitRight',
+				width: '13%',
+				editable: true,
+				render: (_, { limitRight }) => <>{limitRight} px</>,
+			},
+			{
+				title: 'Margem Dir?',
+				dataIndex: 'hasRightMenu',
+				key: 'hasRightMenu',
+				width: '13%',
+				editable: true,
+				render: (hasRightMenu) => {
+					let color = hasRightMenu ? 'green' : 'volcano';
+					let valor = hasRightMenu ? 'sim' : 'não';
 
-				return (
-					<Tag color={color} key={hasRightMenu}>
-						{valor.toUpperCase()}
-					</Tag>
-				);
+					return (
+						<Tag color={color} key={hasRightMenu}>
+							{valor.toUpperCase()}
+						</Tag>
+					);
+				},
 			},
-		},
-		{
-			title: 'Action',
-			key: 'operation',
-			fixed: 'right',
-			width: 100,
-			render: (_, record) => {
-				const editable = isEditing(record.key);
-				return editable ? (
-					<span>
-						<Typography.Link
-							onClick={() => save(record.key)}
-							style={{
-								marginRight: 8,
-							}}
-						>
-							Save
-						</Typography.Link>
-						<Popconfirm title='Sure to cancel?' onConfirm={cancel}>
-							<a>Cancel</a>
-						</Popconfirm>
-					</span>
-				) : (
-					<span>
-						<Typography.Link
-							disabled={editingKey !== ''}
-							onClick={() => edit(record)}
-							style={{
-								marginRight: 8,
-							}}
-						>
-							Editar
-						</Typography.Link>
-						<Popconfirm
-							disabled={editingKey !== ''}
-							title='Confirma apagar?'
-							onConfirm={() => handleDeleteSize(record.key)}
-						>
-							<a>Apagar</a>
-						</Popconfirm>
-					</span>
-				);
+			{
+				title: 'Action',
+				key: 'operation',
+				fixed: 'right',
+				width: 100,
+				render: (_, record) => {
+					const editable = isEditing(record.key);
+					return editable ? (
+						<span>
+							<Typography.Link
+								onClick={() => save(record.key)}
+								style={{
+									marginRight: 8,
+								}}
+							>
+								Save
+							</Typography.Link>
+							<Popconfirm
+								title='Sure to cancel?'
+								onConfirm={cancel}
+							>
+								<a>Cancel</a>
+							</Popconfirm>
+						</span>
+					) : (
+						<span>
+							<Typography.Link
+								disabled={editingKey !== ''}
+								onClick={() => edit(record)}
+								style={{
+									marginRight: 8,
+								}}
+							>
+								Editar
+							</Typography.Link>
+							<Popconfirm
+								disabled={editingKey !== ''}
+								title='Confirma apagar?'
+								onConfirm={() => handleDeleteSize(record.key)}
+							>
+								<a>Apagar</a>
+							</Popconfirm>
+						</span>
+					);
+				},
 			},
-		},
-	];
+		];
+	};
+	const columns = columnsfuntion();
 
 	// rowSelection object indicates the need for row selection
 	const rowSelection = {

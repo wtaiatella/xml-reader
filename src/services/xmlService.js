@@ -6,15 +6,10 @@ const findXmlConfig = async () => {
 	return xmlConfig;
 };
 
-const createXmlConfig = async () => {
+const createXmlConfig = async (req) => {
 	const newXmlConfig = database.XmlConfig.create({
 		data: {
-			oldSizeX: 0,
-			oldSizeY: 0,
-			newSizeX: 0,
-			newSizeY: 0,
-			limitLeft: 0,
-			limitRight: 0,
+			...req.body,
 		},
 	});
 	return newXmlConfig;

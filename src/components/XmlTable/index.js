@@ -2,7 +2,7 @@ import { useContext, useRef, useState, useEffect } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Input, Space, Table, Tag } from 'antd';
+import { Button, Input, Space, Table, Tag, message } from 'antd';
 
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
@@ -16,7 +16,7 @@ export function XmlTable() {
 	const [openModal, setOpenModal] = useState(false);
 	const [showTable, setShowTable] = useState(false);
 
-	const { xmlData, setXmlData, worldmapsTable, setWorldmapsTable } =
+	const { xmlData, worldmapsTable, setWorldmapsTable } =
 		useContext(UserContext);
 
 	useEffect(() => {
@@ -29,8 +29,8 @@ export function XmlTable() {
 					{
 						key: item.getAttribute('Name'),
 						Name: item.getAttribute('Name'),
-						Width: item.getAttribute('Width'),
-						Height: item.getAttribute('Height'),
+						Width: parseInt(item.getAttribute('Width')),
+						Height: parseInt(item.getAttribute('Height')),
 						newSizeX: 0,
 						newSizeY: 0,
 						limitLeft: 0,
@@ -43,6 +43,7 @@ export function XmlTable() {
 		} else {
 			setShowTable(false);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [xmlData]);
 
 	const onSelectChange = (newSelectedRowKeys) => {
@@ -62,7 +63,33 @@ export function XmlTable() {
 
 	const handleEdit = (keys) => {
 		console.log(keys);
-		setOpenModal(true);
+		const selectedWorldmaps = worldmapsTable.filter((worldmap) =>
+			keys.find((key) => key == worldmap.key)
+		);
+		console.log(selectedWorldmaps);
+
+		const width = selectedWorldmaps[0].Width;
+		const height = selectedWorldmaps[0].Height;
+		console.log(width, height);
+
+		const allSameWidth = selectedWorldmaps.every((worldmap) => {
+			console.log('Analisando width do ', worldmap.Name);
+			console.log(worldmap);
+			console.log(worldmap.Width, width);
+			return worldmap.Width == width;
+		});
+		const allSameHeight = selectedWorldmaps.every(
+			(worldmap) => worldmap.Height == height
+		);
+		console.log(allSameWidth, allSameHeight);
+
+		if (allSameWidth && allSameHeight) {
+			setOpenModal(true);
+		} else {
+			message.success(
+				`Por favor, escolha apenas Wordlmaps com as mesmas dimensões!`
+			);
+		}
 	};
 
 	const handleSearch = (selectedKeys, confirm, dataIndex) => {
