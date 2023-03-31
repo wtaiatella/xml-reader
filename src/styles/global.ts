@@ -68,7 +68,7 @@ button {
 export const Container = styled.div`
 	padding: 0 50px;
 	font-size: calc(1px + 2vmin);
-	background-color: #18fcf4;
+	background-color: #8fb0b8;
 `;
 
 export const Content = styled.div`

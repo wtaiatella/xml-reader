@@ -30,12 +30,12 @@ export const Container = styled.div`
 	.ant-table-column-sort {
 		padding: 5px 16px;
 		border-bottom: 1px solid black;
-		background-color: #18fcf4;
+		background-color: #8fb0b8;
 	}
 
 	.ant-table-tbody > tr > td .ant-table,
 	td.ant-table-column-sort {
-		background-color: #18fcf4;
+		background-color: #8fb0b8;
 	}
 
 	.ant-table-filter-trigger {
@@ -49,5 +49,10 @@ export const Container = styled.div`
 			.ant-table-row-expand-icon-cell
 		):not([colspan])::before {
 		background-color: rgba(0, 0, 0, 1) !important;
+	}
+
+	.ant-table-cell {
+		border-bottom: 1px solid rgba(0, 0, 0, 0.88) !important;
+		border-top: transparent !important;
 	}
 `;
