@@ -58,7 +58,9 @@ export function Header() {
 			</div>
 
 			<Upload {...props}>
-				<Button icon={<UploadOutlined />}>Click para Upload</Button>
+				<Button type='primary' icon={<UploadOutlined />}>
+					Click para Upload
+				</Button>
 			</Upload>
 		</Container>
 	);

@@ -50,4 +50,9 @@ export const Container = styled.div`
 		):not([colspan])::before {
 		background-color: rgba(0, 0, 0, 1) !important;
 	}
+
+	.ant-table-cell {
+		border-bottom: 1px solid rgba(0, 0, 0, 0.88) !important;
+		border-top: transparent !important;
+	}
 `;
