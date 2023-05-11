@@ -19,6 +19,10 @@ export const Container = styled.div`
 		padding: 20px;
 	}
 
+	.buttonSave {
+		margin-left: 30px;
+	}
+
 	.tableData {
 		flex-grow: 1;
 	}

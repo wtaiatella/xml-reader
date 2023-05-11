@@ -208,74 +208,31 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 		console.log('Tela Modal button OK');
 		console.log(sizeSelected);
 		console.log(selectedWorldmapsKeys);
-		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap');
-		for (let worldmap of xmlWorldmap) {
+		for (let worldmap of worldmapsTable) {
 			for (let selectedWorldmap of selectedWorldmapsKeys) {
 				console.log('selectedWorldmap: ', selectedWorldmap);
-				console.log('worldmap.Name: ', worldmap.getAttribute('Name'));
+				console.log('worldmap.Name: ', worldmap.Name);
 
-				if (selectedWorldmap === worldmap.getAttribute('Name')) {
-					const Width = worldmap.getAttribute('Width');
-
-					worldmap.setAttribute('Width', sizeSelected.newSizeX);
-					worldmap.setAttribute('MaxX', sizeSelected.newSizeX);
-					worldmap.setAttribute('Height', sizeSelected.newSizeY);
-					worldmap.setAttribute('MaxY', sizeSelected.newSizeY);
-
-					const xmlWorldmapChildrem = worldmap.children;
-					console.log(xmlWorldmapChildrem);
-
-					for (let child of worldmap.children) {
-						const name = child.tagName;
-						console.log('Nome do Nó = ', name);
-						if (name == 'GoView') {
-							child.setAttribute('Width', sizeSelected.newSizeX);
-							child.setAttribute('Height', sizeSelected.newSizeY);
-							child.setAttribute('Top', 0);
-							child.setAttribute('Left', 0);
-						} else {
-							const posX = child.getAttribute('left');
-							if (
-								posX >= sizeSelected.limitRight &&
-								sizeSelected.hasRightMenu
-							) {
-								child.setAttribute(
-									'left',
-									posX + sizeSelected.newSizeX - Width
-								);
-							} else if (posX >= sizeSelected.limitLeft) {
-								child.setAttribute(
-									'left',
-									posX + (sizeSelected.newSizeX - Width) / 2
-								);
-							}
+				const newWorldmapsTable = worldmapsTable.map(
+					(worldmapTable) => {
+						if (worldmapTable.Name == selectedWorldmap) {
+							worldmapTable.newSizeX = sizeSelected.newSizeX;
+							worldmapTable.newSizeY = sizeSelected.newSizeY;
+							worldmapTable.limitLeft = sizeSelected.limitLeft;
+							worldmapTable.limitRight = sizeSelected.limitRight;
+							worldmapTable.hasRightMenu =
+								sizeSelected.hasRightMenu;
 						}
+						return worldmapTable;
 					}
+				);
 
-					const newWorldmapsTable = worldmapsTable.map(
-						(worldmapTable) => {
-							if (worldmapTable.Name == selectedWorldmap) {
-								worldmapTable.newSizeX = sizeSelected.newSizeX;
-								worldmapTable.newSizeY = sizeSelected.newSizeY;
-								worldmapTable.limitLeft =
-									sizeSelected.limitLeft;
-								worldmapTable.limitRight =
-									sizeSelected.limitRight;
-								worldmapTable.hasRightMenu =
-									sizeSelected.hasRightMenu;
-							}
-							return worldmapTable;
-						}
-					);
+				console.log('Nova tabela worldmaps');
+				console.log(newWorldmapsTable);
 
-					console.log('Nova tabela worldmaps');
-					console.log(newWorldmapsTable);
-
-					setWorldmapsTable(newWorldmapsTable);
-					console.log(`Worlmap atualizado`);
-					console.log(worldmap);
-					console.log(xmlData.xml.getElementsByTagName('Worldmap'));
-				}
+				setWorldmapsTable(newWorldmapsTable);
+				console.log(`Worldmap atualizado`);
+				console.log(worldmap);
 			}
 		}
 
@@ -288,8 +245,6 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 	const handleModalCancel = () => {
 		console.log('Clicked cancel button');
 		setOpen(false);
-		setSizeSelected('');
-		//setSearchText('');
 		setDisabled(false);
 		setEditingKey('');
 		setPreFilterValue([]);
