@@ -1,4 +1,4 @@
-import { useContext, useRef, useState, useEffect } from 'react';
+import { useContext, useRef, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
@@ -7,6 +7,8 @@ import { Button, Input, Space, Table, Tag, message } from 'antd';
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 import { TableModal } from './Modal';
+import { updateXmlWorldmaps } from '../../utils';
+import utils from '../../utils';
 
 export function XmlTable() {
 	const [searchText, setSearchText] = useState('');
@@ -14,37 +16,11 @@ export function XmlTable() {
 	const searchInput = useRef(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	const [openModal, setOpenModal] = useState(false);
-	const [showTable, setShowTable] = useState(false);
 
-	const { xmlData, worldmapsTable, setWorldmapsTable } =
-		useContext(UserContext);
+	const { xmlData, worldmapsTable } = useContext(UserContext);
 
-	useEffect(() => {
-		if (xmlData.xml) {
-			setShowTable(true);
-			let data = [];
-			for (let item of xmlData.worldmaps) {
-				data = [
-					...data,
-					{
-						key: item.getAttribute('Name'),
-						Name: item.getAttribute('Name'),
-						Width: parseInt(item.getAttribute('Width')),
-						Height: parseInt(item.getAttribute('Height')),
-						newSizeX: 0,
-						newSizeY: 0,
-						limitLeft: 0,
-						limitRight: 0,
-						hasRightMenu: 0,
-					},
-				];
-			}
-			setWorldmapsTable(data);
-		} else {
-			setShowTable(false);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [xmlData]);
+	console.log('Carregando dados');
+	console.log(xmlData.worldmaps);
 
 	const onSelectChange = (newSelectedRowKeys) => {
 		console.log('selectedRowKeys changed: ', newSelectedRowKeys);
@@ -56,10 +32,6 @@ export function XmlTable() {
 		onChange: onSelectChange,
 	};
 	const hasSelected = selectedRowKeys.length > 0;
-
-	console.log('Carregando dados');
-	console.log(xmlData.worldmaps);
-	console.log(xmlData.xmlConfig);
 
 	const handleEdit = (keys) => {
 		console.log(keys);
@@ -280,7 +252,10 @@ export function XmlTable() {
 					<Button
 						title='Download de arquivo'
 						type='primary'
-						onClick={() => handleEdit([record.key])}
+						onClick={() => {
+							setSelectedRowKeys([record.key]);
+							handleEdit([record.key]);
+						}}
 					>
 						Edit
 					</Button>
@@ -289,80 +264,108 @@ export function XmlTable() {
 		},
 	];
 
-	const handleSave = () => {
-		const xmlText = new XMLSerializer().serializeToString(
-			xmlData.xml.documentElement
-		);
+	const handleSave = (allWorlmaps) => {
+		let xmlToSave = '';
+		console.log('handleSave');
+		//console.log(xmlData.xml);
+		if (allWorlmaps && xmlData.xml) {
+			console.log('salva tudo');
+			xmlToSave = utils.updateXmlWorldmaps(xmlData.xml, worldmapsTable);
+		} else {
+			console.log('save only edited');
+			const selectedWorldmaps = worldmapsTable.filter((worldmap) =>
+				selectedRowKeys.find((key) => key == worldmap.key)
+			);
+			console.log(selectedWorldmaps);
 
-		//Download do XML modificado
-		var element = document.createElement('a');
-		element.setAttribute(
-			'href',
-			'data:text/plain;charset=utf-8,' +
-				`<?xml version="1.0" encoding="UTF-8"?>\n` +
-				encodeURIComponent(xmlText)
-		);
-		element.setAttribute('download', xmlData.fileName);
-		console.log('element para download');
-		console.log(element);
-		document.body.appendChild(element);
-		element.click();
+			xmlToSave = utils.updateXmlWorldmaps(
+				xmlData.xml,
+				selectedWorldmaps
+			);
+		}
+		console.log('Xml to save');
+		console.log(xmlToSave);
+
+		if (xmlData.xml) {
+			const xmlText = new XMLSerializer().serializeToString(
+				xmlData.xml.documentElement
+			);
+
+			//Download do XML modificado
+			var element = document.createElement('a');
+			element.setAttribute(
+				'href',
+				'data:text/plain;charset=utf-8,' +
+					`<?xml version="1.0" encoding="UTF-8"?>\n` +
+					encodeURIComponent(xmlText)
+			);
+			element.setAttribute('download', xmlData.fileName);
+			console.log('element para download');
+			console.log(element);
+			document.body.appendChild(element);
+			element.click();
+		}
 	};
 
+	const saveAllWorldmaps = true;
 	return (
 		<Container>
-			{showTable ? (
-				<>
-					<div className='headerTable'>
-						<p>Arquivo: {xmlData.fileName}</p>
-						<p>Grupo de Worldmaps: {xmlData.worldgroupName}</p>
-					</div>
-					<div className='buttonsTable'>
-						<div className='buttonEdit'>
-							<Button
-								type='primary'
-								onClick={() => handleEdit(selectedRowKeys)}
-								disabled={!hasSelected}
-							>
-								Editar Seleção
-							</Button>
-							<span
-								style={{
-									marginLeft: 8,
-								}}
-							>
-								{hasSelected
-									? `Selected ${selectedRowKeys.length} items`
-									: ''}
-							</span>
-						</div>
-						<Button
-							type='primary'
-							icon={<DownloadOutlined />}
-							onClick={handleSave}
-							className='buttonSave'
-						>
-							Salvar
-						</Button>
-					</div>
-					<Table
-						className='tableData'
-						rowSelection={rowSelection}
-						columns={columns}
-						dataSource={worldmapsTable}
-						pagination={false}
-						scroll={{ x: 1000 }}
-					/>
+			<div className='headerTable'>
+				<p>Arquivo: {xmlData.fileName}</p>
+				<p>Grupo de Worldmaps: {xmlData.worldgroupName}</p>
+			</div>
+			<div className='buttonsTable'>
+				<div className='buttonEdit'>
+					<Button
+						type='primary'
+						onClick={() => handleEdit(selectedRowKeys)}
+						disabled={!hasSelected}
+					>
+						Editar Seleção
+					</Button>
+					<span
+						style={{
+							marginLeft: 8,
+						}}
+					>
+						{hasSelected
+							? `Selected ${selectedRowKeys.length} items`
+							: ''}
+					</span>
+				</div>
+				<div>
+					<Button
+						type='primary'
+						icon={<DownloadOutlined />}
+						onClick={() => handleSave(!saveAllWorldmaps)}
+						className='buttonSave'
+					>
+						Salvar Selecionados
+					</Button>
+					<Button
+						type='primary'
+						icon={<DownloadOutlined />}
+						onClick={() => handleSave(saveAllWorldmaps)}
+						className='buttonSave'
+					>
+						Salvar
+					</Button>
+				</div>
+			</div>
+			<Table
+				className='tableData'
+				rowSelection={rowSelection}
+				columns={columns}
+				dataSource={worldmapsTable}
+				pagination={false}
+				scroll={{ x: 1000 }}
+			/>
 
-					<TableModal
-						open={openModal}
-						setOpen={() => setOpenModal()}
-						selectedWorldmapsKeys={selectedRowKeys}
-					/>
-				</>
-			) : (
-				<span> </span>
-			)}
+			<TableModal
+				open={openModal}
+				setOpen={() => setOpenModal()}
+				selectedWorldmapsKeys={selectedRowKeys}
+			/>
 		</Container>
 	);
 }

@@ -9,7 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export function Header() {
-	const { xmlData, setXmlData } = useContext(UserContext);
+	const { xmlData, setXmlData, setWorldmapsTable } = useContext(UserContext);
 
 	const props = {
 		name: 'file',
@@ -27,15 +27,17 @@ export function Header() {
 				);
 				utils.ConfigXmlData(
 					info.file.originFileObj,
+					xmlData,
 					setXmlData,
-					xmlData
+					setWorldmapsTable
 				);
 			} else if (info.file.status === 'error') {
 				message.success(`${info.file.name} file uploaded successfully`);
 				utils.ConfigXmlData(
 					info.file.originFileObj,
+					xmlData,
 					setXmlData,
-					xmlData
+					setWorldmapsTable
 				);
 			}
 		},
