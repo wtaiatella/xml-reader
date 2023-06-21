@@ -286,10 +286,8 @@ export function XmlTable() {
 		console.log('Xml to save');
 		console.log(xmlToSave);
 
-		if (xmlData.xml) {
-			const xmlText = new XMLSerializer().serializeToString(
-				xmlData.xml.documentElement
-			);
+		if (xmlToSave) {
+			const xmlText = new XMLSerializer().serializeToString(xmlToSave);
 
 			//Download do XML modificado
 			var element = document.createElement('a');
