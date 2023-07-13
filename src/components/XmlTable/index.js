@@ -7,7 +7,6 @@ import { Button, Input, Space, Table, Tag, message } from 'antd';
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 import { TableModal } from './Modal';
-import { updateXmlWorldmaps } from '../../utils';
 import utils from '../../utils';
 
 export function XmlTable() {
@@ -286,10 +285,8 @@ export function XmlTable() {
 		console.log('Xml to save');
 		console.log(xmlToSave);
 
-		if (xmlData.xml) {
-			const xmlText = new XMLSerializer().serializeToString(
-				xmlData.xml.documentElement
-			);
+		if (xmlToSave) {
+			const xmlText = new XMLSerializer().serializeToString(xmlToSave);
 
 			//Download do XML modificado
 			var element = document.createElement('a');
