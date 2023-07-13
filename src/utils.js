@@ -10,9 +10,9 @@ const ConfigXmlData = (file, xmlData, setXmlData, setWorldmapsTable) => {
 		const xmlWorldmaps = xml.getElementsByTagName('Worldmap');
 		const quantWorldmaps = xmlWorldmaps.length;
 
-		const xlsWorldgroup = xml.getElementsByTagName('WmGroup');
-		const worldgroupName = xlsWorldgroup[0].getAttribute('Name');
-		const quantWorldGroups = xlsWorldgroup.length;
+		const xmlWorldgroup = xml.getElementsByTagName('WmGroup');
+		const worldgroupName = xmlWorldgroup[0].getAttribute('Name');
+		const quantWorldGroups = xmlWorldgroup.length;
 
 		//console.log(xmlWorldmap);
 		console.log('XML resultant do parser');
@@ -59,22 +59,43 @@ const ConfigXmlData = (file, xmlData, setXmlData, setWorldmapsTable) => {
 		console.log(xmlWorldmaps.length);
 		let worldmaps = [];
 		for (let item of xmlWorldmaps) {
-			worldmaps = [
-				...worldmaps,
-				{
-					key: item.getAttribute('Name'),
-					Name: item.getAttribute('Name'),
-					Width: parseInt(item.getAttribute('Width')),
-					Height: parseInt(item.getAttribute('Height')),
-					newSizeX: 0,
-					newSizeY: 0,
-					limitLeft: 0,
-					limitRight: 0,
-					hasRightMenu: 0,
-				},
-			];
+			//TODO: chamar API para buscar worldmap na base
+			//TODO: Se não tiver insere dados
+
+			const submitData = async () => {
+				const response = await fetch('/api/worldmaps/', {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						group: worldgroupName,
+						Name: item.getAttribute('Name'),
+						Width: parseInt(item.getAttribute('Width')),
+						Height: parseInt(item.getAttribute('Height')),
+					}),
+				});
+				const respWorldmap = await response.json();
+				console.log('dados retornados');
+				console.log(respWorldmap);
+
+				worldmaps = [
+					...worldmaps,
+					{
+						key: respWorldmap.key,
+						Name: respWorldmap.Name,
+						Width: respWorldmap.Width,
+						Height: respWorldmap.Height,
+						newSizeX: respWorldmap.newSizeX,
+						newSizeY: respWorldmap.newSizeY,
+						limitLeft: respWorldmap.limitLeft,
+						limitRight: respWorldmap.limitRight,
+						hasRightMenu: respWorldmap.hasRightMenu,
+					},
+				];
+				//TODO: Se tiver, carraga valor em worldmapsTable
+				setWorldmapsTable(worldmaps);
+			};
+			submitData();
 		}
-		setWorldmapsTable(worldmaps);
 
 		setXmlData({
 			...xmlData,
@@ -126,7 +147,7 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 			console.log('tabela encontrada');
 			console.log(editedWorldmap);
 
-			const Width = worldmap.getAttribute('Width');
+			const Width = +worldmap.getAttribute('Width');
 
 			worldmap.setAttribute('Width', editedWorldmap.newSizeX);
 			worldmap.setAttribute('MaxX', editedWorldmap.newSizeX);
@@ -135,6 +156,7 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 
 			for (let child of worldmap.children) {
 				const name = child.tagName;
+
 				//console.log('Nome do Nó = ', name);
 				if (name == 'GoView') {
 					child.setAttribute('Width', editedWorldmap.newSizeX);
@@ -142,20 +164,27 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 					child.setAttribute('Top', 0);
 					child.setAttribute('Left', 0);
 				} else {
-					const posX = child.getAttribute('left');
+					console.log(child);
+					const posX = +child.getAttribute('Left');
+
+					let newX = 0;
+					console.log('Nova posição de x');
+					console.log('X antigo = ' + posX);
 					if (
 						posX >= editedWorldmap.limitRight &&
 						editedWorldmap.hasRightMenu
 					) {
-						child.setAttribute(
-							'left',
-							posX + editedWorldmap.newSizeX - Width
-						);
+						newX = posX + editedWorldmap.newSizeX - Width;
+						console.log('X novo = ' + newX);
+
+						child.setAttribute('left', newX);
+						child.setAttribute('ReferenceRotationLeft', newX);
 					} else if (posX >= editedWorldmap.limitLeft) {
-						child.setAttribute(
-							'left',
-							posX + (editedWorldmap.newSizeX - Width) / 2
-						);
+						newX = posX + (editedWorldmap.newSizeX - Width) / 2;
+						console.log('X novo = ' + newX);
+
+						child.setAttribute('left', newX);
+						child.setAttribute('ReferenceRotationLeft', newX);
 					}
 				}
 			}

@@ -202,38 +202,58 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 		});
 	};
 
-	const handleModalOk = () => {
+	const handleModalOk = async () => {
 		//setConfirmLoading(true);
+		//TODO: Adicionar update da base dados
 
 		console.log('Tela Modal button OK');
 		console.log(sizeSelected);
 		console.log(selectedWorldmapsKeys);
-		for (let worldmap of worldmapsTable) {
-			for (let selectedWorldmap of selectedWorldmapsKeys) {
-				console.log('selectedWorldmap: ', selectedWorldmap);
-				console.log('worldmap.Name: ', worldmap.Name);
 
-				const newWorldmapsTable = worldmapsTable.map(
-					(worldmapTable) => {
-						if (worldmapTable.Name == selectedWorldmap) {
-							worldmapTable.newSizeX = sizeSelected.newSizeX;
-							worldmapTable.newSizeY = sizeSelected.newSizeY;
-							worldmapTable.limitLeft = sizeSelected.limitLeft;
-							worldmapTable.limitRight = sizeSelected.limitRight;
-							worldmapTable.hasRightMenu =
-								sizeSelected.hasRightMenu;
-						}
-						return worldmapTable;
-					}
-				);
+		for (let selectedWorldmap of selectedWorldmapsKeys) {
+			console.log('selectedWorldmap to update: ', selectedWorldmap);
 
-				console.log('Nova tabela worldmaps');
-				console.log(newWorldmapsTable);
+			const newWorldmapsTable = [];
+			for (const worldmapTable of worldmapsTable) {
+				if (worldmapTable.key == selectedWorldmap) {
+					//TODO: fazer updade do worldmap
+					console.log('worldmap antes do update');
+					console.log(worldmapTable);
+					const updateWorldmap = async () => {
+						const response = await fetch(
+							`api/worldmaps/${worldmapTable.key}`,
+							{
+								method: 'PUT',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									newSizeX: sizeSelected.newSizeX,
+									newSizeY: sizeSelected.newSizeY,
+									limitLeft: sizeSelected.limitLeft,
+									limitRight: sizeSelected.limitRight,
+									hasRightMenu: sizeSelected.hasRightMenu,
+								}),
+							}
+						);
+						const worldmapUpdated = await response.json();
 
-				setWorldmapsTable(newWorldmapsTable);
-				console.log(`Worldmap atualizado`);
-				console.log(worldmap);
+						console.log('worldmap depois do fetch');
+						console.log(worldmapUpdated);
+						return worldmapUpdated;
+					};
+					const updatedWorldmap = await updateWorldmap();
+					newWorldmapsTable.push(updatedWorldmap);
+				} else {
+					newWorldmapsTable.push(worldmapTable);
+				}
 			}
+
+			console.log('Nova tabela worldmaps');
+			console.log(newWorldmapsTable);
+
+			setWorldmapsTable(newWorldmapsTable);
+			console.log(`Worldmap atualizado`);
 		}
 
 		setTimeout(() => {

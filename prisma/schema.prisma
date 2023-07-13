@@ -21,4 +21,18 @@ model XmlConfig {
   
 }
 
+model Worldmaps {
+  key          	 String @default(cuid())  @id
+  group       	 String
+  Name       	 String @unique
+  Width       	 Int
+  Height       	 Int
+  newSizeX       Int?   @default(0)
+  newSizeY       Int?	@default(0)
+  limitLeft      Int?	@default(0)
+  limitRight     Int?	@default(0)
+  hasRightMenu   Boolean @default(false)
+  
+}
+
 

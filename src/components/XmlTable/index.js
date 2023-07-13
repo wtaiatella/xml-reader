@@ -7,7 +7,6 @@ import { Button, Input, Space, Table, Tag, message } from 'antd';
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 import { TableModal } from './Modal';
-import { updateXmlWorldmaps } from '../../utils';
 import utils from '../../utils';
 
 export function XmlTable() {
