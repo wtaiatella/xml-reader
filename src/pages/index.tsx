@@ -17,7 +17,17 @@ export const getServerSideProps = async () => {
 	};
 };
 
-export default function Home({ xmlConfig }) {
+interface IXmlConfig {
+	key: string;
+	Width: number;
+	Height: number;
+	newSizeX: number;
+	newSizeY: number;
+	limitLeft: number;
+	limitRight: number;
+	hasRightMenu: boolean;
+}
+export default function Home({ xmlConfig }: { xmlConfig: IXmlConfig }) {
 	const { xmlData, setXmlData } = useContext(UserContext);
 
 	useEffect(() => {
