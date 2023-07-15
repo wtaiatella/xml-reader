@@ -7,7 +7,6 @@ import { Button, Input, Space, Table, Tag, message } from 'antd';
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 import { TableModal } from './Modal';
-import { updateXmlWorldmaps } from '../../utils';
 import utils from '../../utils';
 
 export function XmlTable() {
@@ -166,7 +165,7 @@ export function XmlTable() {
 			title: 'Nome da tela',
 			dataIndex: 'Name',
 			key: 'Name',
-			width: '25%',
+			width: '40%',
 			fixed: 'left',
 			...getColumnSearchProps('Name'),
 		},
@@ -175,7 +174,7 @@ export function XmlTable() {
 			title: 'Width',
 			dataIndex: 'Width',
 			key: 'Width',
-			width: '12%',
+			width: '10%',
 			sorter: (a, b) => a.Width - b.Width,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { Width }) => <>{Width} px</>,
@@ -184,7 +183,7 @@ export function XmlTable() {
 			title: 'Height',
 			dataIndex: 'Height',
 			key: 'Height',
-			width: '12%',
+			width: '10%',
 			sorter: (a, b) => a.Height - b.Height,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { Height }) => <>{Height} px</>,
@@ -193,7 +192,7 @@ export function XmlTable() {
 			title: 'Nova Larg',
 			dataIndex: 'newSizeX',
 			key: 'newSizeX',
-			width: '13%',
+			width: '11%',
 			editable: true,
 			sorter: (a, b) => a.newSizeX - b.newSizeX,
 			sortDirections: ['descend', 'ascend'],
@@ -203,7 +202,7 @@ export function XmlTable() {
 			title: 'Nova Alt',
 			dataIndex: 'newSizeY',
 			key: 'newSizeY',
-			width: '13%',
+			width: '11%',
 			editable: true,
 			sorter: (a, b) => a.newSizeY - b.newSizeY,
 			sortDirections: ['descend', 'ascend'],
@@ -229,7 +228,7 @@ export function XmlTable() {
 			title: 'Margem Dir?',
 			dataIndex: 'hasRightMenu',
 			key: 'hasRightMenu',
-			width: '13%',
+			width: '12%',
 			editable: true,
 			render: (hasRightMenu) => {
 				let color = hasRightMenu ? 'green' : 'volcano';
@@ -286,10 +285,8 @@ export function XmlTable() {
 		console.log('Xml to save');
 		console.log(xmlToSave);
 
-		if (xmlData.xml) {
-			const xmlText = new XMLSerializer().serializeToString(
-				xmlData.xml.documentElement
-			);
+		if (xmlToSave) {
+			const xmlText = new XMLSerializer().serializeToString(xmlToSave);
 
 			//Download do XML modificado
 			var element = document.createElement('a');
