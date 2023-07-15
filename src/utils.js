@@ -11,7 +11,10 @@ const ConfigXmlData = (file, xmlData, setXmlData, setWorldmapsTable) => {
 		const quantWorldmaps = xmlWorldmaps.length;
 
 		const xmlWorldgroup = xml.getElementsByTagName('WmGroup');
-		const worldgroupName = xmlWorldgroup[0].getAttribute('Name');
+		const worldgroupName =
+			xmlWorldgroup.length > 0
+				? xmlWorldgroup[0].getAttribute('Name')
+				: null;
 		const quantWorldGroups = xmlWorldgroup.length;
 
 		//console.log(xmlWorldmap);
@@ -164,7 +167,36 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 					child.setAttribute('Top', 0);
 					child.setAttribute('Left', 0);
 				} else {
-					console.log(child);
+					const childName = child.getAttribute('Name');
+					console.log(childName);
+
+					if (childName == 'btnUnifilarGeral') {
+						const btnUnifilar =
+							child.getElementsByTagName('Chunk')[0];
+						console.log(
+							'botão antes = ' +
+								btnUnifilar.childNodes[0].nodeValue
+						);
+						const textNode = btnUnifilar.childNodes[0];
+						const newBtnValue = `
+							AeMCUooDAAdHUkZFRE9NCgAAAAD//v8AAP/+/wAFT0NYUEECAAAAAAAFT0NY
+							Q0lcAQAABAAAAAABAAAEAAAAECb/GgAAAQAAACR5ek2NhdQRvzoAYAhbeYIA
+							AAAAAA4AAMUXAACeAwAACwAAAAgAIAAAAFUATgBJAEYASQBMAEEAUgAgAEcA
+							RQBSAEEATAAzAAAACwD//xMADwAAgAMAAAAAAAkAA1LjC5GPzhGd4wCqAEu4
+							UQEAAAC8Atx8AQAFQXJpYWwTAAgAAAALAP//CAACAAAAAAAIAAIAAAAAAAgA
+							TgAAAHsAQgBFAEYARQA1AEMAMwBEAC0AQgBEADQAMAAtADQAQQBDADYALQA4
+							ADkANwA1AC0AQgA5ADIANQA2AEQAMwBBADcAOAAyAEYAfQAAAAgAAgAAAAAA
+							CAACAAAAAAALAP//CAACAAAAAAAIAAIAAAAAAAgAAgAAAAAACAACAAAAAAAI
+							AAIAAAAAAAgAAgAAAAAAAwAAAAAACAACAAAAAAAFAAAAAAAAAAAA
+							
+							`;
+						textNode.nodeValue = newBtnValue;
+						console.log(
+							'botão depois = ' +
+								btnUnifilar.childNodes[0].nodeValue
+						);
+					}
+
 					const posX = +child.getAttribute('Left');
 
 					let newX = 0;
@@ -185,6 +217,8 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 
 						child.setAttribute('left', newX);
 						child.setAttribute('ReferenceRotationLeft', newX);
+					} else {
+						console.log('X novo = ' + posX);
 					}
 				}
 			}
