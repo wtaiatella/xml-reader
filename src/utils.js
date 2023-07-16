@@ -150,7 +150,8 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 			console.log('tabela encontrada');
 			console.log(editedWorldmap);
 
-			const Width = +worldmap.getAttribute('Width');
+			const oldWidth = +worldmap.getAttribute('Width');
+			const oldHeight = +worldmap.getAttribute('Height');
 
 			worldmap.setAttribute('Width', editedWorldmap.newSizeX);
 			worldmap.setAttribute('MaxX', editedWorldmap.newSizeX);
@@ -209,14 +210,14 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 						posX >= editedWorldmap.limitRight &&
 						editedWorldmap.hasRightMenu
 					) {
-						newX = posX + editedWorldmap.newSizeX - Width;
+						newX = posX + editedWorldmap.newSizeX - oldWidth;
 						console.log('X novo = ' + newX);
 						console.log('Y novo = ' + posY);
 						child.setAttribute('left', newX);
 						child.setAttribute('ReferenceRotationLeft', newX);
 					} else if (posX >= editedWorldmap.limitLeft) {
-						newX = posX + (editedWorldmap.newSizeX - Width) / 2;
-						newX = posX + (editedWorldmap.newSizeY - Height) / 2;
+						newX = posX + (editedWorldmap.newSizeX - oldWidth) / 2;
+						newY = posX + (editedWorldmap.newSizeY - oldHeight) / 2;
 						console.log('X novo = ' + newX);
 						console.log('Y novo = ' + newY);
 
