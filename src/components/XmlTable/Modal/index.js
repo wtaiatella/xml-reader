@@ -203,18 +203,18 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 	};
 
 	const handleModalOk = async () => {
-		//setConfirmLoading(true);
+		setConfirmLoading(true);
 		//TODO: Adicionar update da base dados
 
 		console.log('Tela Modal button OK');
 		console.log(sizeSelected);
 		console.log(selectedWorldmapsKeys);
 
+		const newWorldmapsTable = [...worldmapsTable];
 		for (let selectedWorldmap of selectedWorldmapsKeys) {
 			console.log('selectedWorldmap to update: ', selectedWorldmap);
 
-			const newWorldmapsTable = [];
-			for (const worldmapTable of worldmapsTable) {
+			for (const worldmapTable of newWorldmapsTable) {
 				if (worldmapTable.key == selectedWorldmap) {
 					//TODO: fazer updade do worldmap
 					console.log('worldmap antes do update');
@@ -243,23 +243,21 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 						return worldmapUpdated;
 					};
 					const updatedWorldmap = await updateWorldmap();
-					newWorldmapsTable.push(updatedWorldmap);
-				} else {
-					newWorldmapsTable.push(worldmapTable);
+					worldmapTable.newSizeX = updatedWorldmap.newSizeX;
+					worldmapTable.newSizeY = updatedWorldmap.newSizeY;
+					worldmapTable.limitLeft = updatedWorldmap.limitLeft;
+					worldmapTable.limitRight = updatedWorldmap.limitRight;
+					worldmapTable.hasRightMenu = updatedWorldmap.hasRightMenu;
 				}
 			}
-
-			console.log('Nova tabela worldmaps');
-			console.log(newWorldmapsTable);
-
-			setWorldmapsTable(newWorldmapsTable);
-			console.log(`Worldmap atualizado`);
 		}
+		console.log('Nova tabela worldmaps');
+		console.log(newWorldmapsTable);
 
-		setTimeout(() => {
-			setOpen(false);
-			setConfirmLoading(false);
-		}, 500);
+		setWorldmapsTable(newWorldmapsTable);
+		console.log(`Worldmap atualizado`);
+		setOpen(false);
+		setConfirmLoading(false);
 	};
 
 	const handleModalCancel = () => {
