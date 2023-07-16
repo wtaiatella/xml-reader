@@ -198,27 +198,35 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 					}
 
 					const posX = +child.getAttribute('Left');
+					const posY = +child.getAttribute('Top');
 
 					let newX = 0;
-					console.log('Nova posição de x');
+					let newY = 0;
+					console.log('Nova posição de x e y');
 					console.log('X antigo = ' + posX);
+					console.log('Y antigo = ' + posY);
 					if (
 						posX >= editedWorldmap.limitRight &&
 						editedWorldmap.hasRightMenu
 					) {
 						newX = posX + editedWorldmap.newSizeX - Width;
 						console.log('X novo = ' + newX);
-
+						console.log('Y novo = ' + posY);
 						child.setAttribute('left', newX);
 						child.setAttribute('ReferenceRotationLeft', newX);
 					} else if (posX >= editedWorldmap.limitLeft) {
 						newX = posX + (editedWorldmap.newSizeX - Width) / 2;
+						newX = posX + (editedWorldmap.newSizeY - Height) / 2;
 						console.log('X novo = ' + newX);
+						console.log('Y novo = ' + newY);
 
-						child.setAttribute('left', newX);
+						child.setAttribute('Left', newX);
 						child.setAttribute('ReferenceRotationLeft', newX);
+						child.setAttribute('Top', newY);
+						child.setAttribute('ReferenceRotationTop', newY);
 					} else {
 						console.log('X novo = ' + posX);
+						console.log('Y novo = ' + posY);
 					}
 				}
 			}
