@@ -217,7 +217,7 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 						child.setAttribute('ReferenceRotationLeft', newX);
 					} else if (posX >= editedWorldmap.limitLeft) {
 						newX = posX + (editedWorldmap.newSizeX - oldWidth) / 2;
-						newY = posX + (editedWorldmap.newSizeY - oldHeight) / 2;
+						newY = posY + (editedWorldmap.newSizeY - oldHeight) / 2;
 						console.log('X novo = ' + newX);
 						console.log('Y novo = ' + newY);
 
