@@ -441,6 +441,8 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 				key: 'limitLeft',
 				width: '13%',
 				editable: true,
+				sorter: (a, b) => a.limitLeft - b.limitLeft,
+				sortDirections: ['descend', 'ascend'],
 				render: (_, { limitLeft }) => <>{limitLeft} px</>,
 			},
 			{
@@ -449,6 +451,8 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 				key: 'limitRight',
 				width: '13%',
 				editable: true,
+				sorter: (a, b) => a.limitRight - b.limitRight,
+				sortDirections: ['descend', 'ascend'],
 				render: (_, { limitRight }) => <>{limitRight} px</>,
 			},
 			{
