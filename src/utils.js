@@ -94,12 +94,23 @@ const ConfigXmlData = (file, xmlData, setXmlData, setWorldmapsTable) => {
 						hasRightMenu: respWorldmap.hasRightMenu,
 					},
 				];
-				//TODO: Se tiver, carraga valor em worldmapsTable
-				setWorldmapsTable(worldmaps);
 			};
-			submitData();
+			await submitData();
 		}
 
+		worldmaps.sort((a, b) => {
+			if (a.Name < b.Name) {
+				return -1;
+			}
+			if (a.Name > b.Name) {
+				return 1;
+			}
+			return 0;
+		});
+		console.log('worldmaps ordenados');
+		console.log(worldmaps);
+
+		setWorldmapsTable(worldmaps);
 		setXmlData({
 			...xmlData,
 			fileName: file.name,

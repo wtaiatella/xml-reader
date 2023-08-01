@@ -175,8 +175,6 @@ export function XmlTable() {
 			dataIndex: 'Width',
 			key: 'Width',
 			width: '10%',
-			sorter: (a, b) => a.Width - b.Width,
-			sortDirections: ['descend', 'ascend'],
 			render: (_, { Width }) => <>{Width} px</>,
 		},
 		{
@@ -184,8 +182,6 @@ export function XmlTable() {
 			dataIndex: 'Height',
 			key: 'Height',
 			width: '10%',
-			sorter: (a, b) => a.Height - b.Height,
-			sortDirections: ['descend', 'ascend'],
 			render: (_, { Height }) => <>{Height} px</>,
 		},
 		{
@@ -194,8 +190,6 @@ export function XmlTable() {
 			key: 'newSizeX',
 			width: '11%',
 			editable: true,
-			sorter: (a, b) => a.newSizeX - b.newSizeX,
-			sortDirections: ['descend', 'ascend'],
 			render: (_, { newSizeX }) => <>{newSizeX} px</>,
 		},
 		{
@@ -204,8 +198,6 @@ export function XmlTable() {
 			key: 'newSizeY',
 			width: '11%',
 			editable: true,
-			sorter: (a, b) => a.newSizeY - b.newSizeY,
-			sortDirections: ['descend', 'ascend'],
 			render: (_, { newSizeY }) => <>{newSizeY} px</>,
 		},
 		{
@@ -214,6 +206,8 @@ export function XmlTable() {
 			key: 'limitLeft',
 			width: '13%',
 			editable: true,
+			sorter: (a, b) => a.limitLeft - b.limitLeft,
+			sortDirections: ['descend', 'ascend'],
 			render: (_, { limitLeft }) => <>{limitLeft} px</>,
 		},
 		{
@@ -222,6 +216,8 @@ export function XmlTable() {
 			key: 'limitRight',
 			width: '13%',
 			editable: true,
+			sorter: (a, b) => a.limitRight - b.limitRight,
+			sortDirections: ['descend', 'ascend'],
 			render: (_, { limitRight }) => <>{limitRight} px</>,
 		},
 		{
