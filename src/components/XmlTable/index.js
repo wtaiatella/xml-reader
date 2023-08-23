@@ -73,9 +73,11 @@ export function XmlTable() {
 
 	const edit = (record) => {
 		form.setFieldsValue({
-			name: '',
-			age: '',
-			address: '',
+			newSizeX: '',
+			newSizeY: '',
+			limitLeft: '',
+			limitRight: '',
+			hasRightMenu: '',
 			...record,
 		});
 		setEditingKey(record.key);
@@ -87,21 +89,28 @@ export function XmlTable() {
 
 	const save = async (key) => {
 		console.log('Tela Modal button OK');
+		console.log(key);
 
 		try {
 			const row = await form.validateFields();
-			const newData = [...worldmapsTable];
+			console.log('row = ', row);
+
 			const newWorldmapsTable = [...worldmapsTable];
 
 			const index = newWorldmapsTable.findIndex(
 				(item) => key === item.key
 			);
 			if (index > -1) {
-				const item = newWorldmapsTable[index];
+				let item = newWorldmapsTable[index];
+
+				console.log('item antes splice= ', item);
 				newWorldmapsTable.splice(index, 1, {
 					...item,
 					...row,
 				});
+
+				item = newWorldmapsTable[index];
+
 				setWorldmapsTable(newWorldmapsTable);
 				setEditingKey('');
 
@@ -126,6 +135,7 @@ export function XmlTable() {
 
 					console.log('worldmap depois do fetch');
 					console.log(worldmapUpdated);
+
 					return worldmapUpdated;
 				};
 				await updateWorldmap();
@@ -459,7 +469,6 @@ export function XmlTable() {
 							cell: EditableCell,
 						},
 					}}
-					bordered
 					className='tableData'
 					rowClassName='editable-row'
 					rowSelection={rowSelection}
