@@ -178,7 +178,7 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 					child.setAttribute('Height', editedWorldmap.newSizeY);
 					child.setAttribute('Top', 0);
 					child.setAttribute('Left', 0);
-					const ZoomFactor = editedWorldmap.newSizeY / oldHeight;
+					const ZoomFactor = 1200 / +editedWorldmap.newSizeY;
 					child.setAttribute('ZoomFactor', ZoomFactor);
 				} else {
 					const childName = child.getAttribute('Name');
