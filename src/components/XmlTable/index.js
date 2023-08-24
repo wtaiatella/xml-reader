@@ -12,7 +12,7 @@ import {
 	Space,
 	Table,
 	Tag,
-	message,
+	Switch,
 } from 'antd';
 
 import { UserContext } from '../../contexts/UserContext';
@@ -30,7 +30,15 @@ const EditableCell = ({
 	children,
 	...restProps
 }) => {
-	const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+	console.log('inputType = ', inputType);
+	console.log('record = ', record);
+	console.log(typeof record);
+	const inputNode =
+		inputType === 'number' ? (
+			<InputNumber />
+		) : (
+			<Switch defaultChecked={record?.hasRightMenu} />
+		);
 	return (
 		<td {...restProps}>
 			{editing ? (
@@ -427,7 +435,8 @@ export function XmlTable() {
 			...col,
 			onCell: (record) => ({
 				record,
-				inputType: col.dataIndex === 'age' ? 'number' : 'text',
+				inputType:
+					col.dataIndex === 'hasRightMenu' ? 'boolean' : 'number',
 				dataIndex: col.dataIndex,
 				title: col.title,
 				editing: isEditing(record),
