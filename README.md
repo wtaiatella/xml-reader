@@ -6,73 +6,49 @@
 2. [How does it work?](#how-does-it-work)
 3. [Tech Stack](#tech-stack)
 4. [Commands](#commands)
-5. [Planned Updates](#Planned-updates)
 
 ## What is this website?
 
-Este é o meu proprio site que desenvolvi para apresentar alguns de meus trabalhos e os conhecimentos adquiridos ao longo de meus estudos.
+The object of this site is to be used in one of the activities carried out by the development team of the Substation Supervision and Control system in the company where I currently work.
 
-Programei este aplicativo para ser utilizado em uma das atividades realizada pela equipe de desenvolvimento do sistema de Supervisão e Controle de Subestações na empresa onde trabalho atualmente.
-O projeto que estamos trabalhando faz parte da modernização do centro de operação de uma grande transmissora de energia e será preciso editar as telas de operação das subestações pois os novos monitores possuem nova dimenções. Para realizar esta edição pode ser feita de uas maneiras, utilizando o software proprio e abrir mais de 800 telas uma por uma para editar a nova dimensão e reposicionar alguns objetos em tela ou fazer edição diretamente no arquivo XML.
+One of the stages of the project consists of adapting the size of the operation screens of the substations to the new size of the monitors that will be installed in the control rooms. The problem is that to edit this information it would be necessary to open one by one and change the dimension and position parameters of each object on the screen. This work would take days to edit more than 800 screens.
 
-Abrir as telas 
-A atividade original em questão, consite em editar a nova dimensão da tela 
-
-A atividade em questão, demandaria muitos dias de trabalho pois seria preciso editar varios atributos de posição e dimensão de objetos em mais de 800 arquivos xml.  ou então utilizar o software de parametrização de telas para abrir uma por uma e fazer as devidas edições.
-
-Com esta aplicação desenvolvida em Next juntamente com os recursos de tabela e alguns componentes da Ant Design, o trabalho foi reduzido de dias para algumas horas além de permitir facilmente a reedição dos atributos em poucos segundos. 
-
-
+Knowing that this information is stored in XML files and that the format of these files is very simple, it was possible to develop an application that allows the editing of these attributes in a simple and fast way. With this application developed in Next together with the table resources and some components of Ant Design, the work was reduced from days to a few hours and also allows the attributes to be easily re-edited in a few seconds.
 
 ## How does it work?
 
-Os arquivos 
-
-Superficially, this is a somewhat-shoddily made corporate website (that I made using Vue). On it (thematically because the corporate overlords are out of touch), there are a number of superfluous features. A circle expands from wherever the user clicks. The header will show waves of expanding circles when moused over. There's a hidden score called the breakpoint. These (and their properties) can all be modified from the about page--the only page relatively safe from the 'ghost'.
-
-Otherwise, breakpoint grows over time and as pages are changed. The higher it is, the more likely for certain events to occur (possible actions are under src/utils/enums.js, how they work is in src/store/breakpoint/actions.js lines 67-224). Other actions occur inside of the components, such as the hero splash image gainin random filter properties.
+The application is very simple and intuitive. The user only needs to select the XML file to be edited and the application will load the information in a table. The user can then edit the attributes of each object in the table and save the changes to the XML file.
 
 ## Tech Stack
 
--   Frontend: JavaScript (TypesScript/React)
--   Backend: Node (TypeScript/Express)
--   Database: MongoDB
+-   Frontend: JavaScript (Next)
+              Styled Components
+                Ant Design
+-   Backend (API):  JavaScript (Next)
+-   Database: PostgreSQL            
 
-NOTE: To use this app, you need an active MongoDB server and a connection URL set in the .env file in the backend folder. There is a backup that assumes there is an unsecured MongoDB running locally.
 
-1. To run the backend and the frontend simultaneously: concurrently
-    > I chose this package to run items concurrently from a base folder so only one command was needed. Alternatives would include: a shell script, a npm command like "(cd backend && npm start) & cd ../frontend && yarn start" (note: I haven't tested these, so I don't know how they would work) or a few other packages I don't know.
-2. Frontend: react, react-router-dom, jest, @testing-library/react
-    > The frontend only really needed to output a simple input, a loading spinner and a button. I included react-router-dom because, though the project doesn't need pages, I think it makes the interface simpler and more indicative of its goals. The
-3. Backend: express, mongoose, dotenv, mocha, chai, chai-http, typescript (and various types), ts-node and nodemon
-    > I used mongoose rather than the normal MongoDB drivers because it was a little easier to set up.
+NOTE: To use this app, you need an provide a connection URL set in the .env file .
+
+1. Frontend / Backend: Next
+    > The frontend is build with Next.js, I chose it because it's a framework that I'm familiar with and it's easy to set up with Ant Design and the possibility to use an database PostgreSQL to store data from XML files. I also used Styled Components to style the app.
+    
+2. Database: PostgreSQL
+    > I chose PostgreSQL because it's a relational database and it's easy to set up with Next.js. I also used Prisma to connect to the database and to create the models.
 
 ## Commands
 
 To install (from home directory)
 
 1. npm install
-2. cd backend && npm install
-3. cd ../frontend && yarn install
 
-To run both (from home directory):
+To create database (from home directory):
 
-1. npm start (with database as is)
-2. npm run seed (with database seeded with 5 default URLs)
-3. npm run reset (with all URLs deleted from the database)
+1. npx prisma db push --preview-feature
+2. npx prisma migrate dev --preview-feature
+3. npx prisma generate
+4. npx prisma studio
 
-Frontend commands (all other commands, like yarn eject, aren't included):
+To start commands (from home directory):
 
-1. yarn start
-2. yarn test
-
-Backend commands:
-
-1. npm start
-2. npm run seed (seed the database with 5 default URLs)
-3. npm run reset (remove all URLs from the database)
-
-## Planned Updates
-
--   Media queries
--   Make the site look better
+1. npm run dev
