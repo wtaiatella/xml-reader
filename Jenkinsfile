@@ -8,6 +8,7 @@ pipeline {
                 sh 'pwd'
                 sh 'ls -la'
                 sh 'whoami'
+                sh 'npm install'
 
             }
         }
