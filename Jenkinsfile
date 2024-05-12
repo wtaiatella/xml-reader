@@ -6,6 +6,11 @@ pipeline {
                 echo 'Building..'
                 // Comandos para build
                 sh 'pwd'
+                sh 'ls -la'
+                sh 'npm install'
+                sh 'npm run build'
+                sh 'ls -la'
+
             }
         }
         stage('Test') {
