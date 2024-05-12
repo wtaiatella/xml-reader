@@ -5,7 +5,7 @@ pipeline {
             steps {
                 echo 'Building..'
                 // Comandos para build
-                npm run build
+                pwd
             }
         }
         stage('Test') {
