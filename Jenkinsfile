@@ -8,8 +8,12 @@ pipeline {
                 sh 'pwd'
                 sh 'ls -la'
                 sh 'whoami'
-                sh '/var/lib/jenkins/.nvm/versions/node/v20.13.1/bin/npm install'
-                sh '/var/lib/jenkins/.nvm/versions/node/v20.13.1/bin/npm run build'
+                sh  '''
+                    export NVM_DIR="$HOME/.nvm"
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    nvm use v20.13.1
+                    npm install
+                '''
 
             }
         }
