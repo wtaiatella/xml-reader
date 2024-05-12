@@ -5,6 +5,7 @@ pipeline {
             steps {
                 echo 'Building..'
                 // Comandos para build
+                sh 'pwd'
             }
         }
         stage('Test') {
