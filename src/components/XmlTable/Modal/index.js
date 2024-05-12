@@ -202,94 +202,67 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 		});
 	};
 
-	const handleModalOk = () => {
-		//setConfirmLoading(true);
+	const handleModalOk = async () => {
+		setConfirmLoading(true);
+		//TODO: Adicionar update da base dados
 
 		console.log('Tela Modal button OK');
 		console.log(sizeSelected);
 		console.log(selectedWorldmapsKeys);
-		const xmlWorldmap = xmlData.xml.getElementsByTagName('Worldmap');
-		for (let worldmap of xmlWorldmap) {
-			for (let selectedWorldmap of selectedWorldmapsKeys) {
-				console.log('selectedWorldmap: ', selectedWorldmap);
-				console.log('worldmap.Name: ', worldmap.getAttribute('Name'));
 
-				if (selectedWorldmap === worldmap.getAttribute('Name')) {
-					const Width = worldmap.getAttribute('Width');
+		const newWorldmapsTable = [...worldmapsTable];
+		for (let selectedWorldmap of selectedWorldmapsKeys) {
+			console.log('selectedWorldmap to update: ', selectedWorldmap);
 
-					worldmap.setAttribute('Width', sizeSelected.newSizeX);
-					worldmap.setAttribute('MaxX', sizeSelected.newSizeX);
-					worldmap.setAttribute('Height', sizeSelected.newSizeY);
-					worldmap.setAttribute('MaxY', sizeSelected.newSizeY);
-
-					const xmlWorldmapChildrem = worldmap.children;
-					console.log(xmlWorldmapChildrem);
-
-					for (let child of worldmap.children) {
-						const name = child.tagName;
-						console.log('Nome do Nó = ', name);
-						if (name == 'GoView') {
-							child.setAttribute('Width', sizeSelected.newSizeX);
-							child.setAttribute('Height', sizeSelected.newSizeY);
-							child.setAttribute('Top', 0);
-							child.setAttribute('Left', 0);
-						} else {
-							const posX = child.getAttribute('left');
-							if (
-								posX >= sizeSelected.limitRight &&
-								sizeSelected.hasRightMenu
-							) {
-								child.setAttribute(
-									'left',
-									posX + sizeSelected.newSizeX - Width
-								);
-							} else if (posX >= sizeSelected.limitLeft) {
-								child.setAttribute(
-									'left',
-									posX + (sizeSelected.newSizeX - Width) / 2
-								);
+			for (const worldmapTable of newWorldmapsTable) {
+				if (worldmapTable.key == selectedWorldmap) {
+					//TODO: fazer updade do worldmap
+					console.log('worldmap antes do update');
+					console.log(worldmapTable);
+					const updateWorldmap = async () => {
+						const response = await fetch(
+							`api/worldmaps/${worldmapTable.key}`,
+							{
+								method: 'PUT',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									newSizeX: sizeSelected.newSizeX,
+									newSizeY: sizeSelected.newSizeY,
+									limitLeft: sizeSelected.limitLeft,
+									limitRight: sizeSelected.limitRight,
+									hasRightMenu: sizeSelected.hasRightMenu,
+								}),
 							}
-						}
-					}
+						);
+						const worldmapUpdated = await response.json();
 
-					const newWorldmapsTable = worldmapsTable.map(
-						(worldmapTable) => {
-							if (worldmapTable.Name == selectedWorldmap) {
-								worldmapTable.newSizeX = sizeSelected.newSizeX;
-								worldmapTable.newSizeY = sizeSelected.newSizeY;
-								worldmapTable.limitLeft =
-									sizeSelected.limitLeft;
-								worldmapTable.limitRight =
-									sizeSelected.limitRight;
-								worldmapTable.hasRightMenu =
-									sizeSelected.hasRightMenu;
-							}
-							return worldmapTable;
-						}
-					);
-
-					console.log('Nova tabela worldmaps');
-					console.log(newWorldmapsTable);
-
-					setWorldmapsTable(newWorldmapsTable);
-					console.log(`Worlmap atualizado`);
-					console.log(worldmap);
-					console.log(xmlData.xml.getElementsByTagName('Worldmap'));
+						console.log('worldmap depois do fetch');
+						console.log(worldmapUpdated);
+						return worldmapUpdated;
+					};
+					const updatedWorldmap = await updateWorldmap();
+					worldmapTable.newSizeX = updatedWorldmap.newSizeX;
+					worldmapTable.newSizeY = updatedWorldmap.newSizeY;
+					worldmapTable.limitLeft = updatedWorldmap.limitLeft;
+					worldmapTable.limitRight = updatedWorldmap.limitRight;
+					worldmapTable.hasRightMenu = updatedWorldmap.hasRightMenu;
 				}
 			}
 		}
+		console.log('Nova tabela worldmaps');
+		console.log(newWorldmapsTable);
 
-		setTimeout(() => {
-			setOpen(false);
-			setConfirmLoading(false);
-		}, 500);
+		setWorldmapsTable(newWorldmapsTable);
+		console.log(`Worldmap atualizado`);
+		setOpen(false);
+		setConfirmLoading(false);
 	};
 
 	const handleModalCancel = () => {
 		console.log('Clicked cancel button');
 		setOpen(false);
-		setSizeSelected('');
-		//setSearchText('');
 		setDisabled(false);
 		setEditingKey('');
 		setPreFilterValue([]);
@@ -468,6 +441,8 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 				key: 'limitLeft',
 				width: '13%',
 				editable: true,
+				sorter: (a, b) => a.limitLeft - b.limitLeft,
+				sortDirections: ['descend', 'ascend'],
 				render: (_, { limitLeft }) => <>{limitLeft} px</>,
 			},
 			{
@@ -476,6 +451,8 @@ export function TableModal({ open, setOpen, selectedWorldmapsKeys }) {
 				key: 'limitRight',
 				width: '13%',
 				editable: true,
+				sorter: (a, b) => a.limitRight - b.limitRight,
+				sortDirections: ['descend', 'ascend'],
 				render: (_, { limitRight }) => <>{limitRight} px</>,
 			},
 			{

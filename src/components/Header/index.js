@@ -9,7 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export function Header() {
-	const { xmlData, setXmlData } = useContext(UserContext);
+	const { xmlData, setXmlData, setWorldmapsTable } = useContext(UserContext);
 
 	const props = {
 		name: 'file',
@@ -27,38 +27,44 @@ export function Header() {
 				);
 				utils.ConfigXmlData(
 					info.file.originFileObj,
+					xmlData,
 					setXmlData,
-					xmlData
+					setWorldmapsTable
 				);
 			} else if (info.file.status === 'error') {
 				message.success(`${info.file.name} file uploaded successfully`);
 				utils.ConfigXmlData(
 					info.file.originFileObj,
+					xmlData,
 					setXmlData,
-					xmlData
+					setWorldmapsTable
 				);
 			}
 		},
 	};
+	//siemens - 1024x538
+	//xml - 512x512
 
 	return (
 		<Container>
 			<Link href='/'>
 				<Image
-					src='/images/logoSiemens.png'
+					src='/images/xml-file.png'
 					className='App-logo'
 					alt='logo'
 					width='107'
-					height='87'
+					height='107'
 				/>
 			</Link>
 
 			<div className='fileInput'>
-				<p className='FileName'>EDITOR DE WORLDMAPS</p>
+				<p className='FileName'>EDITOR DE XML</p>
 			</div>
 
 			<Upload {...props}>
-				<Button icon={<UploadOutlined />}>Click para Upload</Button>
+				<Button type='primary' icon={<UploadOutlined />}>
+					Click para Upload
+				</Button>
 			</Upload>
 		</Container>
 	);

@@ -1,0 +1,8 @@
+{
+	"name": "XML Editor",
+	"imgUrl": "/img/sites/portifolio-xml.png",
+	"techs": ["React", "Next", "AWS", "Typescript", "BackEnd", "API"],
+	"type": "Own Project",
+	"website": "https://xml-editor.wtaiatella.com.br/",
+	"repo": "https://github.com/wtaiatella/xml-reader"
+}
