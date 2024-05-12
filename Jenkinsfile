@@ -8,8 +8,8 @@ pipeline {
                 sh 'pwd'
                 sh 'ls -la'
                 sh 'whoami'
-                sh 'npm install'
-                sh 'npm run build'
+                sh '/var/lib/jenkins/.nvm/versions/node/v20.13.1/bin/npm install'
+                sh '/var/lib/jenkins/.nvm/versions/node/v20.13.1/bin/npm run build'
 
             }
         }
