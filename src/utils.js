@@ -178,6 +178,8 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 					child.setAttribute('Height', editedWorldmap.newSizeY);
 					child.setAttribute('Top', 0);
 					child.setAttribute('Left', 0);
+					const ZoomFactor = 1200 / +editedWorldmap.newSizeY;
+					child.setAttribute('ZoomFactor', ZoomFactor);
 				} else {
 					const childName = child.getAttribute('Name');
 					console.log(childName);
@@ -214,7 +216,7 @@ const updateXmlWorldmaps = (xml, worldmapsTable) => {
 
 					let newX = 0;
 					let newY = 0;
-					console.log('Nova posição de x e y');
+					console.log('Antiga posição de x e y');
 					console.log('X antigo = ' + posX);
 					console.log('Y antigo = ' + posY);
 					if (

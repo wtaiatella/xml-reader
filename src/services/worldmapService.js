@@ -20,22 +20,19 @@ const findWorldmap = async (group, Name) => {
 const validateWorldmap = async (req) => {
 	const dados = req.body;
 
-	const exist = await database.Worldmaps.findUnique({
+	const validated = await database.Worldmaps.upsert({
 		where: {
 			Name: dados.Name,
 		},
+		update: {
+			...req.body,
+		},
+		create: {
+			...req.body,
+		},
 	});
 
-	if (exist) {
-		return exist;
-	} else {
-		const created = await database.Worldmaps.create({
-			data: {
-				...req.body,
-			},
-		});
-		return created;
-	}
+	return validated;
 };
 
 const createWorldmap = async (req) => {

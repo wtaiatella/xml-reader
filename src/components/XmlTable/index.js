@@ -2,12 +2,66 @@ import { useContext, useRef, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { SearchOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Input, Space, Table, Tag, message } from 'antd';
+import {
+	Form,
+	Typography,
+	Popconfirm,
+	Button,
+	Input,
+	InputNumber,
+	Space,
+	Table,
+	Tag,
+	Switch,
+} from 'antd';
 
 import { UserContext } from '../../contexts/UserContext';
 import { Container } from './styles';
 import { TableModal } from './Modal';
 import utils from '../../utils';
+
+const EditableCell = ({
+	editing,
+	dataIndex,
+	title,
+	inputType,
+	record,
+	index,
+	children,
+	...restProps
+}) => {
+	console.log('inputType = ', inputType);
+	console.log('record = ', record);
+	console.log(typeof record);
+	const inputNode =
+		inputType === 'number' ? (
+			<InputNumber />
+		) : (
+			<Switch defaultChecked={record?.hasRightMenu} />
+		);
+	return (
+		<td {...restProps}>
+			{editing ? (
+				<Form.Item
+					name={dataIndex}
+					style={{
+						margin: 0,
+					}}
+					rules={[
+						{
+							required: true,
+							message: `Please Input ${title}!`,
+						},
+					]}
+				>
+					{inputNode}
+				</Form.Item>
+			) : (
+				children
+			)}
+		</td>
+	);
+};
 
 export function XmlTable() {
 	const [searchText, setSearchText] = useState('');
@@ -15,11 +69,89 @@ export function XmlTable() {
 	const searchInput = useRef(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	const [openModal, setOpenModal] = useState(false);
+	const [form] = Form.useForm();
+	const [editingKey, setEditingKey] = useState('');
+	const { xmlData, setXmlData, worldmapsTable, setWorldmapsTable } =
+		useContext(UserContext);
 
-	const { xmlData, worldmapsTable } = useContext(UserContext);
+	const isEditing = (record) => record.key === editingKey;
 
 	console.log('Carregando dados');
 	console.log(xmlData.worldmaps);
+
+	const edit = (record) => {
+		form.setFieldsValue({
+			newSizeX: '',
+			newSizeY: '',
+			limitLeft: '',
+			limitRight: '',
+			hasRightMenu: '',
+			...record,
+		});
+		setEditingKey(record.key);
+	};
+
+	const cancel = () => {
+		setEditingKey('');
+	};
+
+	const save = async (key) => {
+		console.log('Tela Modal button OK');
+		console.log(key);
+
+		try {
+			const row = await form.validateFields();
+			console.log('row = ', row);
+
+			const newWorldmapsTable = [...worldmapsTable];
+
+			const index = newWorldmapsTable.findIndex(
+				(item) => key === item.key
+			);
+			if (index > -1) {
+				let item = newWorldmapsTable[index];
+
+				console.log('item antes splice= ', item);
+				newWorldmapsTable.splice(index, 1, {
+					...item,
+					...row,
+				});
+
+				item = newWorldmapsTable[index];
+
+				setWorldmapsTable(newWorldmapsTable);
+				setEditingKey('');
+
+				console.log('item antes do fetch');
+				console.log(item);
+
+				const updateWorldmap = async () => {
+					const response = await fetch(`api/worldmaps/${item.key}`, {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							newSizeX: +item.newSizeX,
+							newSizeY: +item.newSizeY,
+							limitLeft: +item.limitLeft,
+							limitRight: +item.limitRight,
+							hasRightMenu: item.hasRightMenu,
+						}),
+					});
+					const worldmapUpdated = await response.json();
+
+					console.log('worldmap depois do fetch');
+					console.log(worldmapUpdated);
+
+					return worldmapUpdated;
+				};
+				await updateWorldmap();
+			}
+		} catch (errInfo) {
+			console.log('Validate Failed:', errInfo);
+		}
+	};
 
 	const onSelectChange = (newSelectedRowKeys) => {
 		console.log('selectedRowKeys changed: ', newSelectedRowKeys);
@@ -30,38 +162,8 @@ export function XmlTable() {
 		selectedRowKeys,
 		onChange: onSelectChange,
 	};
+
 	const hasSelected = selectedRowKeys.length > 0;
-
-	const handleEdit = (keys) => {
-		console.log(keys);
-		const selectedWorldmaps = worldmapsTable.filter((worldmap) =>
-			keys.find((key) => key == worldmap.key)
-		);
-		console.log(selectedWorldmaps);
-
-		const width = selectedWorldmaps[0].Width;
-		const height = selectedWorldmaps[0].Height;
-		console.log(width, height);
-
-		const allSameWidth = selectedWorldmaps.every((worldmap) => {
-			console.log('Analisando width do ', worldmap.Name);
-			console.log(worldmap);
-			console.log(worldmap.Width, width);
-			return worldmap.Width == width;
-		});
-		const allSameHeight = selectedWorldmaps.every(
-			(worldmap) => worldmap.Height == height
-		);
-		console.log(allSameWidth, allSameHeight);
-
-		if (allSameWidth && allSameHeight) {
-			setOpenModal(true);
-		} else {
-			message.success(
-				`Por favor, escolha apenas Wordlmaps com as mesmas dimensões!`
-			);
-		}
-	};
 
 	const handleSearch = (selectedKeys, confirm, dataIndex) => {
 		confirm();
@@ -175,50 +277,60 @@ export function XmlTable() {
 			dataIndex: 'Width',
 			key: 'Width',
 			width: '10%',
+			sorter: (a, b) => a.Width - b.Width,
+			sortDirections: ['descend', 'ascend'],
 			render: (_, { Width }) => <>{Width} px</>,
+			editable: true,
 		},
 		{
 			title: 'Height',
 			dataIndex: 'Height',
 			key: 'Height',
 			width: '10%',
+			sorter: (a, b) => a.Height - b.Height,
+			sortDirections: ['descend', 'ascend'],
 			render: (_, { Height }) => <>{Height} px</>,
+			editable: true,
 		},
 		{
 			title: 'Nova Larg',
 			dataIndex: 'newSizeX',
 			key: 'newSizeX',
 			width: '11%',
-			editable: true,
+			sorter: (a, b) => a.newSizeX - b.newSizeX,
+			sortDirections: ['descend', 'ascend'],
 			render: (_, { newSizeX }) => <>{newSizeX} px</>,
+			editable: true,
 		},
 		{
 			title: 'Nova Alt',
 			dataIndex: 'newSizeY',
 			key: 'newSizeY',
 			width: '11%',
-			editable: true,
+			sorter: (a, b) => a.newSizeY - b.newSizeY,
+			sortDirections: ['descend', 'ascend'],
 			render: (_, { newSizeY }) => <>{newSizeY} px</>,
+			editable: true,
 		},
 		{
 			title: 'Margem Esq',
 			dataIndex: 'limitLeft',
 			key: 'limitLeft',
 			width: '13%',
-			editable: true,
 			sorter: (a, b) => a.limitLeft - b.limitLeft,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { limitLeft }) => <>{limitLeft} px</>,
+			editable: true,
 		},
 		{
 			title: 'Margem Dir',
 			dataIndex: 'limitRight',
 			key: 'limitRight',
 			width: '13%',
-			editable: true,
 			sorter: (a, b) => a.limitRight - b.limitRight,
 			sortDirections: ['descend', 'ascend'],
 			render: (_, { limitRight }) => <>{limitRight} px</>,
+			editable: true,
 		},
 		{
 			title: 'Margem Dir?',
@@ -243,13 +355,28 @@ export function XmlTable() {
 			fixed: 'right',
 			width: 100,
 			render: (_, record) => {
-				return (
+				const editable = isEditing(record);
+				return editable ? (
+					<span>
+						<Typography.Link
+							onClick={() => save(record.key)}
+							style={{
+								marginRight: 8,
+							}}
+						>
+							Save
+						</Typography.Link>
+						<Popconfirm title='Sure to cancel?' onConfirm={cancel}>
+							<a>Cancel</a>
+						</Popconfirm>
+					</span>
+				) : (
 					<Button
 						title='Download de arquivo'
 						type='primary'
 						onClick={() => {
 							setSelectedRowKeys([record.key]);
-							handleEdit([record.key]);
+							edit(record);
 						}}
 					>
 						Edit
@@ -300,6 +427,23 @@ export function XmlTable() {
 		}
 	};
 
+	const mergedColumns = columns.map((col) => {
+		if (!col.editable) {
+			return col;
+		}
+		return {
+			...col,
+			onCell: (record) => ({
+				record,
+				inputType:
+					col.dataIndex === 'hasRightMenu' ? 'boolean' : 'number',
+				dataIndex: col.dataIndex,
+				title: col.title,
+				editing: isEditing(record),
+			}),
+		};
+	});
+
 	const saveAllWorldmaps = true;
 	return (
 		<Container>
@@ -308,24 +452,6 @@ export function XmlTable() {
 				<p>Grupo de Worldmaps: {xmlData.worldgroupName}</p>
 			</div>
 			<div className='buttonsTable'>
-				<div className='buttonEdit'>
-					<Button
-						type='primary'
-						onClick={() => handleEdit(selectedRowKeys)}
-						disabled={!hasSelected}
-					>
-						Editar Seleção
-					</Button>
-					<span
-						style={{
-							marginLeft: 8,
-						}}
-					>
-						{hasSelected
-							? `Selected ${selectedRowKeys.length} items`
-							: ''}
-					</span>
-				</div>
 				<div>
 					<Button
 						type='primary'
@@ -345,15 +471,22 @@ export function XmlTable() {
 					</Button>
 				</div>
 			</div>
-			<Table
-				className='tableData'
-				rowSelection={rowSelection}
-				columns={columns}
-				dataSource={worldmapsTable}
-				pagination={false}
-				scroll={{ x: 1000 }}
-			/>
-
+			<Form form={form} component={false}>
+				<Table
+					components={{
+						body: {
+							cell: EditableCell,
+						},
+					}}
+					className='tableData'
+					rowClassName='editable-row'
+					rowSelection={rowSelection}
+					columns={mergedColumns}
+					dataSource={worldmapsTable}
+					pagination={false}
+					scroll={{ x: 1000 }}
+				/>
+			</Form>
 			<TableModal
 				open={openModal}
 				setOpen={() => setOpenModal()}

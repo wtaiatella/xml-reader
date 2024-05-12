@@ -34,12 +34,12 @@ export const Container = styled.div`
 	.ant-table-column-sort {
 		padding: 5px 16px;
 		border-bottom: 1px solid black;
-		background-color: #18fcf4;
+		background-color: #8fb0b8;
 	}
 
 	.ant-table-tbody > tr > td .ant-table,
 	td.ant-table-column-sort {
-		background-color: #18fcf4;
+		background-color: #8fb0b8;
 	}
 
 	.ant-table-filter-trigger {

@@ -42,21 +42,23 @@ export function Header() {
 			}
 		},
 	};
+	//siemens - 1024x538
+	//xml - 512x512
 
 	return (
 		<Container>
 			<Link href='/'>
 				<Image
-					src='/images/logoSiemens.png'
+					src='/images/xml-file.png'
 					className='App-logo'
 					alt='logo'
 					width='107'
-					height='87'
+					height='107'
 				/>
 			</Link>
 
 			<div className='fileInput'>
-				<p className='FileName'>EDITOR DE WORLDMAPS</p>
+				<p className='FileName'>EDITOR DE XML</p>
 			</div>
 
 			<Upload {...props}>
