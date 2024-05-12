@@ -9,6 +9,7 @@ pipeline {
                 sh 'ls -la'
                 sh 'whoami'
                 sh 'npm install'
+                sh 'npm run build'
 
             }
         }
