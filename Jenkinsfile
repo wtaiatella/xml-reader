@@ -7,9 +7,7 @@ pipeline {
                 // Comandos para build
                 sh 'pwd'
                 sh 'ls -la'
-                sh 'npm install'
-                sh 'npm run build'
-                sh 'ls -la'
+                sh 'whoami'
 
             }
         }
